@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> | <%= config ? config.brandName : "Baile da Selva" %></title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="/">
+        <span class="brand-mark"></span>
+        <span>
+          <strong><%= config ? config.brandName : "Baile da Selva" %></strong>
+          <small>Painel do bot</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Menu">
+        <a class="<%= active === 'dashboard' ? 'active' : '' %>" href="/">Dashboard</a>
+        <a class="<%= active === 'settings' ? 'active' : '' %>" href="/settings">Geral</a>
+        <a class="<%= active === 'tickets' ? 'active' : '' %>" href="/tickets">Tickets</a>
+        <a class="<%= active === 'forms' ? 'active' : '' %>" href="/forms">Formularios</a>
+        <a class="<%= active === 'store' ? 'active' : '' %>" href="/store">Loja</a>
+        <a class="<%= active === 'welcome' ? 'active' : '' %>" href="/welcome">Boas-vindas</a>
+        <a class="<%= active === 'activity' ? 'active' : '' %>" href="/activity">Registros</a>
+      </nav>
+      <form action="/logout" method="post" class="logout">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="ghost-button">Sair</button>
+      </form>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow"><%= botStatus.ready ? "Bot online" : "Bot offline" %></p>
+          <h1><%= title %></h1>
+        </div>
+        <div class="status-pill <%= botStatus.ready ? 'is-online' : 'is-offline' %>">
+          <span></span>
+          <%= botStatus.ready ? botStatus.user : (botStatus.lastError || "Aguardando token") %>
+        </div>
+      </header>
+      <% if (flash) { %>
+        <div class="flash <%= flash.type %>"><%= flash.message %></div>
+      <% } %>

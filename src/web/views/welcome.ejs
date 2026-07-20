@@ -1,0 +1,31 @@
+<%- include("partials/header") %>
+
+<section class="panel wide">
+  <div class="panel-head">
+    <h2>Entrada no servidor</h2>
+  </div>
+  <form method="post" action="/welcome" class="form-grid">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label class="switch full">
+      <input type="checkbox" name="enabled" <%= config.welcome.enabled ? "checked" : "" %>>
+      <span>Boas-vindas ativas</span>
+    </label>
+    <label>
+      Canal de boas-vindas
+      <input name="channelId" value="<%= config.welcome.channelId %>" placeholder="ID do canal">
+    </label>
+    <label>
+      Cargo automatico
+      <input name="autoRoleId" value="<%= config.welcome.autoRoleId %>" placeholder="ID do cargo opcional">
+    </label>
+    <label class="full">
+      Mensagem
+      <textarea name="message" rows="5"><%= config.welcome.message %></textarea>
+    </label>
+    <div class="form-actions full">
+      <button type="submit" class="primary-button">Salvar boas-vindas</button>
+    </div>
+  </form>
+</section>
+
+<%- include("partials/footer") %>

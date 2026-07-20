@@ -1,0 +1,36 @@
+{
+  "name": "baile-da-selva-bot",
+  "version": "1.0.0",
+  "description": "Bot Discord profissional com painel web para comunidade Roblox.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon --watch src --ext js,ejs,css --ignore data --ignore node_modules src/index.js",
+    "check": "node scripts/check-js.js"
+  },
+  "keywords": [
+    "discord",
+    "roblox",
+    "dashboard",
+    "tickets",
+    "loja"
+  ],
+  "author": "Baile da Selva",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.4.1",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "engines": {
+    "node": ">=18.17"
+  }
+}

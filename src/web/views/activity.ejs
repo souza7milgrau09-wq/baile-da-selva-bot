@@ -1,0 +1,86 @@
+<%- include("partials/header") %>
+
+<section class="panel wide">
+  <div class="panel-head">
+    <h2>Eventos</h2>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tipo</th><th>Detalhes</th><th>Data</th></tr></thead>
+      <tbody>
+        <% events.forEach((event) => { %>
+          <tr>
+            <td><%= event.type %></td>
+            <td><code><%= JSON.stringify(event.payload) %></code></td>
+            <td><%= formatDate(event.createdAt) %></td>
+          </tr>
+        <% }) %>
+        <% if (!events.length) { %>
+          <tr><td colspan="3">Sem eventos registrados.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="grid-two">
+  <div class="panel">
+    <div class="panel-head"><h2>Tickets</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Usuario</th><th>Status</th><th>Criado</th></tr></thead>
+        <tbody>
+          <% tickets.forEach((ticket) => { %>
+            <tr>
+              <td><%= ticket.userTag %></td>
+              <td><span class="badge"><%= ticket.status %></span></td>
+              <td><%= formatDate(ticket.createdAt) %></td>
+            </tr>
+          <% }) %>
+          <% if (!tickets.length) { %><tr><td colspan="3">Sem tickets.</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Pedidos</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Cliente</th><th>Produto</th><th>Status</th></tr></thead>
+        <tbody>
+          <% orders.forEach((order) => { %>
+            <tr>
+              <td><%= order.userTag %></td>
+              <td><%= order.productName %></td>
+              <td><span class="badge"><%= order.status %></span></td>
+            </tr>
+          <% }) %>
+          <% if (!orders.length) { %><tr><td colspan="3">Sem pedidos.</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="panel wide">
+  <div class="panel-head"><h2>Formularios</h2></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Usuario</th><th>Formulario</th><th>Status</th><th>Criado</th></tr></thead>
+      <tbody>
+        <% submissions.forEach((submission) => { %>
+          <tr>
+            <td><%= submission.userTag %></td>
+            <td><%= submission.formName %></td>
+            <td><span class="badge"><%= submission.status %></span></td>
+            <td><%= formatDate(submission.createdAt) %></td>
+          </tr>
+        <% }) %>
+        <% if (!submissions.length) { %><tr><td colspan="4">Sem formularios.</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include("partials/footer") %>

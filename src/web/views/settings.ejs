@@ -1,0 +1,43 @@
+<%- include("partials/header") %>
+
+<section class="panel wide">
+  <div class="panel-head">
+    <h2>Identidade e acesso</h2>
+  </div>
+  <form method="post" action="/settings" class="form-grid">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>
+      Nome do projeto
+      <input name="brandName" value="<%= config.brandName %>" required>
+    </label>
+    <label>
+      Cor principal
+      <input type="color" name="accentColor" value="<%= config.accentColor %>">
+    </label>
+    <label>
+      ID do servidor
+      <input name="guildId" value="<%= config.guildId %>" placeholder="123456789012345678">
+    </label>
+    <label>
+      ID da aplicacao
+      <input name="clientId" value="<%= config.clientId %>" placeholder="123456789012345678">
+    </label>
+    <label>
+      URL do painel
+      <input name="panelBaseUrl" value="<%= config.panelBaseUrl %>" placeholder="http://127.0.0.1:3000">
+    </label>
+    <label>
+      Canal de logs gerais
+      <input name="modLogChannelId" value="<%= config.modLogChannelId %>" placeholder="ID do canal">
+    </label>
+    <label class="full">
+      Cargos da equipe
+      <textarea name="staffRoleIds" rows="3" placeholder="Um ID por linha"><%= (config.staffRoleIds || []).join("\n") %></textarea>
+    </label>
+    <div class="form-actions full">
+      <button type="submit" class="primary-button">Salvar geral</button>
+    </div>
+  </form>
+</section>
+
+<%- include("partials/footer") %>

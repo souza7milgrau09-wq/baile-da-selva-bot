@@ -1,0 +1,92 @@
+<%- include("partials/header") %>
+<% const form = config.forms.items[0] || {}; %>
+
+<section class="grid-two">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Formulario ativo</h2>
+    </div>
+    <form method="post" action="/forms" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label class="switch">
+        <input type="checkbox" name="formsEnabled" <%= config.forms.enabled ? "checked" : "" %>>
+        <span>Modulo ativo</span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" name="enabled" <%= form.enabled ? "checked" : "" %>>
+        <span>Formulario ativo</span>
+      </label>
+      <label>
+        Canal do painel
+        <input name="panelChannelId" value="<%= config.forms.panelChannelId %>" placeholder="ID do canal">
+      </label>
+      <label>
+        Canal de analise
+        <input name="reviewChannelId" value="<%= config.forms.reviewChannelId %>" placeholder="ID do canal">
+      </label>
+      <label>
+        Nome interno
+        <input name="name" value="<%= form.name || '' %>">
+      </label>
+      <label>
+        Titulo publico
+        <input name="title" value="<%= form.title || '' %>">
+      </label>
+      <label>
+        Texto publico
+        <textarea name="description" rows="4"><%= form.description || '' %></textarea>
+      </label>
+      <label>
+        Texto do botao
+        <input name="buttonLabel" value="<%= form.buttonLabel || '' %>">
+      </label>
+      <label>
+        Perguntas
+        <textarea name="questions" rows="7"><%= (form.questions || []).join("\n") %></textarea>
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="primary-button">Salvar formulario</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Enviar painel</h2>
+    </div>
+    <form method="post" action="/forms/send" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>
+        Canal
+        <input name="channelId" value="<%= config.forms.panelChannelId %>" placeholder="ID do canal">
+      </label>
+      <button type="submit" class="secondary-button">Enviar painel de formulario</button>
+    </form>
+
+    <div class="section-gap">
+      <div class="panel-head compact">
+        <h2>Envios recentes</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Usuario</th><th>Status</th><th>Formulario</th><th>Criado</th></tr></thead>
+          <tbody>
+            <% submissions.forEach((submission) => { %>
+              <tr>
+                <td><%= submission.userTag %></td>
+                <td><span class="badge"><%= submission.status %></span></td>
+                <td><%= submission.formName %></td>
+                <td><%= formatDate(submission.createdAt) %></td>
+              </tr>
+            <% }) %>
+            <% if (!submissions.length) { %>
+              <tr><td colspan="4">Nenhum formulario enviado.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include("partials/footer") %>

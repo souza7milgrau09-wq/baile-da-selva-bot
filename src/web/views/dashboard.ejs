@@ -1,0 +1,116 @@
+<%- include("partials/header") %>
+
+<section class="stat-grid">
+  <article class="stat-card">
+    <span>Tickets abertos</span>
+    <strong><%= stats.ticketsOpen %></strong>
+  </article>
+  <article class="stat-card">
+    <span>Tickets fechados</span>
+    <strong><%= stats.ticketsClosed %></strong>
+  </article>
+  <article class="stat-card">
+    <span>Pedidos ativos</span>
+    <strong><%= stats.ordersOpen %></strong>
+  </article>
+  <article class="stat-card">
+    <span>Formularios pendentes</span>
+    <strong><%= stats.formsPending %></strong>
+  </article>
+</section>
+
+<section class="grid-two">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Controle rapido</h2>
+    </div>
+    <form action="/bot/register" method="post" class="inline-actions">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button type="submit" class="secondary-button">Registrar comandos</button>
+      <a class="secondary-link" href="/tickets">Configurar tickets</a>
+      <a class="secondary-link" href="/store">Configurar loja</a>
+    </form>
+    <dl class="detail-list">
+      <div><dt>Servidor</dt><dd><%= config.guildId || "Nao definido" %></dd></div>
+      <div><dt>Aplicacao</dt><dd><%= config.clientId || "Nao definido" %></dd></div>
+      <div><dt>URL do painel</dt><dd><%= config.panelBaseUrl %></dd></div>
+    </dl>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Ultimos eventos</h2>
+      <a href="/activity">Ver tudo</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Tipo</th><th>Data</th></tr>
+        </thead>
+        <tbody>
+          <% events.forEach((event) => { %>
+            <tr>
+              <td><%= event.type %></td>
+              <td><%= formatDate(event.createdAt) %></td>
+            </tr>
+          <% }) %>
+          <% if (!events.length) { %>
+            <tr><td colspan="2">Sem eventos ainda.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="grid-two">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Tickets recentes</h2>
+      <a href="/tickets">Abrir</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Usuario</th><th>Status</th><th>Criado</th></tr></thead>
+        <tbody>
+          <% tickets.forEach((ticket) => { %>
+            <tr>
+              <td><%= ticket.userTag %></td>
+              <td><span class="badge"><%= ticket.status %></span></td>
+              <td><%= formatDate(ticket.createdAt) %></td>
+            </tr>
+          <% }) %>
+          <% if (!tickets.length) { %>
+            <tr><td colspan="3">Nenhum ticket registrado.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Pedidos recentes</h2>
+      <a href="/store">Abrir</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Produto</th><th>Status</th><th>Criado</th></tr></thead>
+        <tbody>
+          <% orders.forEach((order) => { %>
+            <tr>
+              <td><%= order.productName %></td>
+              <td><span class="badge"><%= order.status %></span></td>
+              <td><%= formatDate(order.createdAt) %></td>
+            </tr>
+          <% }) %>
+          <% if (!orders.length) { %>
+            <tr><td colspan="3">Nenhum pedido registrado.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<%- include("partials/footer") %>

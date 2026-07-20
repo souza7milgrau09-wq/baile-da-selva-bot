@@ -1,0 +1,170 @@
+<%- include("partials/header") %>
+
+<section class="grid-two">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Configuracao da loja</h2>
+    </div>
+    <form method="post" action="/store/settings" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label class="switch">
+        <input type="checkbox" name="enabled" <%= config.store.enabled ? "checked" : "" %>>
+        <span>Loja ativa</span>
+      </label>
+      <label>
+        Canal do painel
+        <input name="panelChannelId" value="<%= config.store.panelChannelId %>" placeholder="ID do canal">
+      </label>
+      <label>
+        Categoria dos pedidos
+        <input name="orderCategoryId" value="<%= config.store.orderCategoryId %>" placeholder="ID da categoria">
+      </label>
+      <label>
+        Canal de logs dos pedidos
+        <input name="orderLogChannelId" value="<%= config.store.orderLogChannelId %>" placeholder="ID do canal">
+      </label>
+      <label>
+        Moeda
+        <input name="currency" value="<%= config.store.currency %>">
+      </label>
+      <label>
+        Titulo do painel
+        <input name="panelTitle" value="<%= config.store.panelTitle %>">
+      </label>
+      <label>
+        Texto do painel
+        <textarea name="panelDescription" rows="4"><%= config.store.panelDescription %></textarea>
+      </label>
+      <label>
+        Instrucoes de pagamento
+        <textarea name="paymentInstructions" rows="5"><%= config.store.paymentInstructions %></textarea>
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="primary-button">Salvar loja</button>
+      </div>
+    </form>
+
+    <div class="section-gap">
+      <form method="post" action="/store/send" class="stack">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label>
+          Canal
+          <input name="channelId" value="<%= config.store.panelChannelId %>" placeholder="ID do canal">
+        </label>
+        <button type="submit" class="secondary-button">Enviar painel da loja</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Novo produto</h2>
+    </div>
+    <form method="post" action="/store/products" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label class="switch">
+        <input type="checkbox" name="enabled" checked>
+        <span>Produto ativo</span>
+      </label>
+      <label>
+        Nome
+        <input name="name" required>
+      </label>
+      <label>
+        Preco
+        <input name="price" placeholder="9,90" required>
+      </label>
+      <label>
+        Cargo entregue
+        <input name="roleId" placeholder="ID do cargo opcional">
+      </label>
+      <label>
+        Descricao
+        <textarea name="description" rows="3"></textarea>
+      </label>
+      <label>
+        Mensagem de entrega
+        <textarea name="deliveryText" rows="3"></textarea>
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="primary-button">Cadastrar produto</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section class="panel wide">
+  <div class="panel-head">
+    <h2>Produtos</h2>
+  </div>
+  <div class="product-grid">
+    <% (config.store.products || []).forEach((product) => { %>
+      <article class="product-card">
+        <form method="post" action="/store/products/<%= product.id %>" class="stack">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <label class="switch">
+            <input type="checkbox" name="enabled" <%= product.enabled ? "checked" : "" %>>
+            <span>Ativo</span>
+          </label>
+          <label>
+            Nome
+            <input name="name" value="<%= product.name %>">
+          </label>
+          <label>
+            Preco
+            <input name="price" value="<%= product.price %>">
+          </label>
+          <label>
+            Cargo entregue
+            <input name="roleId" value="<%= product.roleId %>">
+          </label>
+          <label>
+            Descricao
+            <textarea name="description" rows="3"><%= product.description %></textarea>
+          </label>
+          <label>
+            Mensagem de entrega
+            <textarea name="deliveryText" rows="3"><%= product.deliveryText %></textarea>
+          </label>
+          <div class="form-actions">
+            <button type="submit" class="secondary-button">Salvar</button>
+          </div>
+        </form>
+        <form method="post" action="/store/products/<%= product.id %>/delete" class="delete-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="danger-button" data-confirm="Remover este produto?">Remover</button>
+        </form>
+      </article>
+    <% }) %>
+    <% if (!(config.store.products || []).length) { %>
+      <p class="muted">Nenhum produto cadastrado.</p>
+    <% } %>
+  </div>
+</section>
+
+<section class="panel wide">
+  <div class="panel-head">
+    <h2>Pedidos recentes</h2>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Cliente</th><th>Produto</th><th>Valor</th><th>Status</th><th>Criado</th></tr></thead>
+      <tbody>
+        <% orders.forEach((order) => { %>
+          <tr>
+            <td><%= order.userTag %></td>
+            <td><%= order.productName %></td>
+            <td><%= config.store.currency %> <%= order.productPrice %></td>
+            <td><span class="badge"><%= order.status %></span></td>
+            <td><%= formatDate(order.createdAt) %></td>
+          </tr>
+        <% }) %>
+        <% if (!orders.length) { %>
+          <tr><td colspan="5">Nenhum pedido registrado.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include("partials/footer") %>

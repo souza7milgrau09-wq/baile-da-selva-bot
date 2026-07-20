@@ -1,0 +1,103 @@
+<%- include("partials/header") %>
+
+<section class="grid-two">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Configuracao</h2>
+    </div>
+    <form method="post" action="/tickets" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label class="switch">
+        <input type="checkbox" name="enabled" <%= config.ticket.enabled ? "checked" : "" %>>
+        <span>Tickets ativos</span>
+      </label>
+      <label>
+        Canal do painel
+        <input name="panelChannelId" value="<%= config.ticket.panelChannelId %>" placeholder="ID do canal">
+      </label>
+      <label>
+        Categoria dos tickets
+        <input name="categoryId" value="<%= config.ticket.categoryId %>" placeholder="ID da categoria">
+      </label>
+      <label>
+        Canal de logs
+        <input name="logChannelId" value="<%= config.ticket.logChannelId %>" placeholder="ID do canal">
+      </label>
+      <label>
+        Canal de transcripts
+        <input name="transcriptChannelId" value="<%= config.ticket.transcriptChannelId %>" placeholder="ID do canal">
+      </label>
+      <label>
+        Cargos de suporte
+        <textarea name="supportRoleIds" rows="3"><%= (config.ticket.supportRoleIds || []).join("\n") %></textarea>
+      </label>
+      <label>
+        Titulo do painel
+        <input name="panelTitle" value="<%= config.ticket.panelTitle %>">
+      </label>
+      <label>
+        Texto do painel
+        <textarea name="panelDescription" rows="4"><%= config.ticket.panelDescription %></textarea>
+      </label>
+      <label>
+        Texto do botao
+        <input name="buttonLabel" value="<%= config.ticket.buttonLabel %>">
+      </label>
+      <label>
+        Mensagem no ticket
+        <textarea name="openedMessage" rows="4"><%= config.ticket.openedMessage %></textarea>
+      </label>
+      <label class="switch">
+        <input type="checkbox" name="allowMultipleTickets" <%= config.ticket.allowMultipleTickets ? "checked" : "" %>>
+        <span>Permitir varios tickets por pessoa</span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" name="deleteClosedTickets" <%= config.ticket.deleteClosedTickets ? "checked" : "" %>>
+        <span>Apagar canal apos fechar</span>
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="primary-button">Salvar tickets</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Enviar painel</h2>
+    </div>
+    <form method="post" action="/tickets/send" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>
+        Canal
+        <input name="channelId" value="<%= config.ticket.panelChannelId %>" placeholder="ID do canal">
+      </label>
+      <button type="submit" class="secondary-button">Enviar painel de ticket</button>
+    </form>
+
+    <div class="section-gap">
+      <div class="panel-head compact">
+        <h2>Ultimos tickets</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Usuario</th><th>Status</th><th>Canal</th><th>Criado</th></tr></thead>
+          <tbody>
+            <% tickets.forEach((ticket) => { %>
+              <tr>
+                <td><%= ticket.userTag %></td>
+                <td><span class="badge"><%= ticket.status %></span></td>
+                <td><%= ticket.channelId %></td>
+                <td><%= formatDate(ticket.createdAt) %></td>
+              </tr>
+            <% }) %>
+            <% if (!tickets.length) { %>
+              <tr><td colspan="4">Nenhum ticket registrado.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include("partials/footer") %>

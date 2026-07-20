@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar | Baile da Selva</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="login-page">
+  <main class="login-panel">
+    <span class="brand-mark large"></span>
+    <h1>Painel do Bot</h1>
+    <p>Baile da Selva</p>
+    <% if (flash) { %>
+      <div class="flash <%= flash.type %>"><%= flash.message %></div>
+    <% } %>
+    <form method="post" action="/login" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>
+        Senha do painel
+        <input type="password" name="password" autocomplete="current-password" required autofocus>
+      </label>
+      <button type="submit" class="primary-button">Entrar</button>
+    </form>
+  </main>
+</body>
+</html>
