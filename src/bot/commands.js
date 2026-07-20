@@ -7,6 +7,12 @@ function buildSlashCommands() {
       .setDescription("Mostra o status do bot e do painel.")
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
     new SlashCommandBuilder()
+      .setName("ajuda")
+      .setDescription("Mostra os comandos principais do Baile da Selva."),
+    new SlashCommandBuilder()
+      .setName("ping")
+      .setDescription("Testa se o bot esta online."),
+    new SlashCommandBuilder()
       .setName("painel-ticket")
       .setDescription("Envia o painel de ticket no canal escolhido.")
       .addChannelOption((option) =>
@@ -28,7 +34,7 @@ function buildSlashCommands() {
       .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
     new SlashCommandBuilder()
       .setName("painel-loja")
-      .setDescription("Envia o painel da loja.")
+      .setDescription("Envia o painel da loja interna.")
       .addChannelOption((option) =>
         option
           .setName("canal")

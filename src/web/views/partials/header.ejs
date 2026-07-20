@@ -12,18 +12,34 @@
       <a class="brand" href="/">
         <span class="brand-mark"></span>
         <span>
-          <strong><%= config ? config.brandName : "Baile da Selva" %></strong>
-          <small>Painel do bot</small>
+          <strong>Baile da Selva</strong>
+          <small>Painel privado</small>
         </span>
       </a>
+      <div class="bot-card">
+        <span class="bot-avatar"><%= ((config.botIdentity && config.botIdentity.name) || config.brandName || "B").slice(0, 1).toUpperCase() %></span>
+        <span>
+          <strong><%= (config.botIdentity && config.botIdentity.name) || config.brandName || "Baile da Selva" %></strong>
+          <small><%= config.botIdentity && config.botIdentity.prefix ? config.botIdentity.prefix : "bs!" %> comandos</small>
+        </span>
+      </div>
+      <label class="nav-search">
+        <span>Buscar configuracao</span>
+        <input data-nav-search placeholder="Buscar configuracao...">
+      </label>
       <nav class="nav" aria-label="Menu">
-        <a class="<%= active === 'dashboard' ? 'active' : '' %>" href="/">Dashboard</a>
-        <a class="<%= active === 'settings' ? 'active' : '' %>" href="/settings">Geral</a>
-        <a class="<%= active === 'tickets' ? 'active' : '' %>" href="/tickets">Tickets</a>
-        <a class="<%= active === 'forms' ? 'active' : '' %>" href="/forms">Formularios</a>
-        <a class="<%= active === 'store' ? 'active' : '' %>" href="/store">Loja</a>
-        <a class="<%= active === 'welcome' ? 'active' : '' %>" href="/welcome">Boas-vindas</a>
-        <a class="<%= active === 'activity' ? 'active' : '' %>" href="/activity">Registros</a>
+        <p class="nav-group">Configuracoes</p>
+        <a data-nav-item class="<%= active === 'dashboard' ? 'active' : '' %>" href="/"><span class="nav-icon">IN</span> Inicio</a>
+        <a data-nav-item class="<%= active === 'settings' ? 'active' : '' %>" href="/settings"><span class="nav-icon">BT</span> Bot</a>
+        <% (moduleCatalog || []).forEach((item) => { %>
+          <a data-nav-item class="<%= active === item.key ? 'active' : '' %>" href="/modules/<%= item.key %>"><span class="nav-icon"><%= item.icon %></span> <%= item.title %></a>
+        <% }) %>
+        <p class="nav-group">Operacao</p>
+        <a data-nav-item class="<%= active === 'tickets' ? 'active' : '' %>" href="/tickets"><span class="nav-icon">TK</span> Ticket</a>
+        <a data-nav-item class="<%= active === 'forms' ? 'active' : '' %>" href="/forms"><span class="nav-icon">FM</span> Formularios</a>
+        <a data-nav-item class="<%= active === 'store' ? 'active' : '' %>" href="/store"><span class="nav-icon">LJ</span> Loja interna</a>
+        <a data-nav-item class="<%= active === 'welcome' ? 'active' : '' %>" href="/welcome"><span class="nav-icon">BV</span> Boas-vindas</a>
+        <a data-nav-item class="<%= active === 'activity' ? 'active' : '' %>" href="/activity"><span class="nav-icon">RG</span> Registros</a>
       </nav>
       <form action="/logout" method="post" class="logout">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -33,7 +49,7 @@
     <main class="main">
       <header class="topbar">
         <div>
-          <p class="eyebrow"><%= botStatus.ready ? "Bot online" : "Bot offline" %></p>
+          <p class="eyebrow">Configuracoes / <%= title %></p>
           <h1><%= title %></h1>
         </div>
         <div class="status-pill <%= botStatus.ready ? 'is-online' : 'is-offline' %>">

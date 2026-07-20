@@ -9,6 +9,16 @@ document.addEventListener("click", (event) => {
   }
 });
 
+const navSearch = document.querySelector("[data-nav-search]");
+if (navSearch) {
+  navSearch.addEventListener("input", () => {
+    const query = navSearch.value.trim().toLowerCase();
+    document.querySelectorAll("[data-nav-item]").forEach((item) => {
+      item.hidden = query.length > 0 && !item.textContent.toLowerCase().includes(query);
+    });
+  });
+}
+
 async function refreshStatus() {
   const pill = document.querySelector(".status-pill");
   if (!pill) {

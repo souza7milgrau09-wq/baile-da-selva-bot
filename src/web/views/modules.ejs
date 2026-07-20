@@ -1,0 +1,68 @@
+<%- include("partials/header") %>
+
+<section class="module-hero">
+  <div class="module-icon"><%= panelModule.icon %></div>
+  <div>
+    <p class="eyebrow"><%= panelModule.group %></p>
+    <h2><%= panelModule.title %></h2>
+    <p><%= panelModule.description %></p>
+  </div>
+  <span class="module-state <%= moduleConfig.enabled ? 'on' : 'off' %>">
+    <%= moduleConfig.enabled ? "Ativo" : "Desativado" %>
+  </span>
+</section>
+
+<section class="panel wide">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Configuracao</p>
+      <h2><%= panelModule.title %></h2>
+    </div>
+  </div>
+
+  <form method="post" action="/modules/<%= panelModule.key %>" class="form-grid">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <% panelModule.fields.forEach((field) => { %>
+      <% const value = moduleConfig[field.name]; %>
+      <% if (field.type === "checkbox") { %>
+        <label class="switch">
+          <input type="checkbox" name="<%= field.name %>" <%= value ? "checked" : "" %>>
+          <span><%= field.label %></span>
+        </label>
+      <% } else if (field.type === "textarea") { %>
+        <label class="full">
+          <%= field.label %>
+          <textarea name="<%= field.name %>" rows="5" placeholder="<%= field.placeholder || '' %>"><%= Array.isArray(value) ? value.join("\n") : (value || "") %></textarea>
+        </label>
+      <% } else { %>
+        <label>
+          <%= field.label %>
+          <input
+            type="<%= field.type || 'text' %>"
+            name="<%= field.name %>"
+            value="<%= value || '' %>"
+            placeholder="<%= field.placeholder || '' %>"
+            <% if (field.min !== undefined) { %>min="<%= field.min %>"<% } %>
+          >
+        </label>
+      <% } %>
+    <% }) %>
+
+    <div class="form-actions full">
+      <button type="submit" class="primary-button">Salvar modulo</button>
+      <a class="secondary-link" href="/">Voltar ao painel</a>
+    </div>
+  </form>
+</section>
+
+<section class="panel wide quiet-panel">
+  <div class="panel-head">
+    <h2>Sem pagamentos</h2>
+  </div>
+  <p class="muted">
+    Este modulo e privado do Baile da Selva. Ele nao cria plano, assinatura ou cobranca para usar o painel.
+  </p>
+</section>
+
+<%- include("partials/footer") %>

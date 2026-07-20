@@ -37,6 +37,7 @@ class DiscordBot {
     this.ready = false;
     this.started = false;
     this.lastError = "";
+    this.tempVoiceChannels = new Map();
     this.client = new Client({
       intents: [
         GatewayIntentBits.Guilds,
@@ -71,6 +72,20 @@ class DiscordBot {
       this.handleWelcome(member).catch(async (error) => {
         this.lastError = error.message;
         await this.db.addEvent("welcome_error", { message: error.message });
+      });
+    });
+
+    this.client.on(Events.MessageCreate, (message) => {
+      this.handleMessage(message).catch(async (error) => {
+        this.lastError = error.message;
+        await this.db.addEvent("message_handler_error", { message: error.message });
+      });
+    });
+
+    this.client.on(Events.VoiceStateUpdate, (oldState, newState) => {
+      this.handleVoiceState(oldState, newState).catch(async (error) => {
+        this.lastError = error.message;
+        await this.db.addEvent("voice_handler_error", { message: error.message });
       });
     });
   }
@@ -132,6 +147,27 @@ class DiscordBot {
 
   async handleCommand(interaction) {
     const config = await this.db.getConfig();
+    if (interaction.commandName === "ajuda") {
+      const prefix = (config.botIdentity && config.botIdentity.prefix) || "bs!";
+      await interaction.reply({
+        ephemeral: true,
+        content: [
+          `Comandos do ${config.brandName}:`,
+          `/status - mostra o status do bot`,
+          `/painel-ticket - envia o painel de ticket`,
+          `/painel-formulario - envia o formulario ativo`,
+          `/painel-loja - envia a loja interna`,
+          `${prefix}ajuda - comandos por prefixo`
+        ].join("\n")
+      });
+      return;
+    }
+
+    if (interaction.commandName === "ping") {
+      await interaction.reply({ ephemeral: true, content: "Pong. Bot online." });
+      return;
+    }
+
     if (interaction.commandName === "status") {
       const status = this.getStatus();
       await interaction.reply({
@@ -206,6 +242,166 @@ class DiscordBot {
     if (scope === "order" && ["paid", "deliver", "cancel"].includes(action)) {
       await this.updateOrder(interaction, id, action);
     }
+  }
+
+  async handleMessage(message) {
+    if (!message.guild || message.author.bot) {
+      return;
+    }
+
+    const config = await this.db.getConfig();
+    if (await this.handleAutomod(message, config)) {
+      return;
+    }
+    if (await this.handlePrefixCommand(message, config)) {
+      return;
+    }
+    await this.handleAutoResponder(message, config);
+  }
+
+  async handleAutomod(message, config) {
+    const security = config.modules && config.modules.security;
+    if (!security || !security.enabled || !security.automodEnabled || this.isStaff(message.member, config)) {
+      return false;
+    }
+
+    const content = String(message.content || "");
+    const lower = content.toLowerCase();
+    const blockedWords = security.blockedWords || [];
+    const hasBlockedWord = blockedWords.some((word) => word && lower.includes(String(word).toLowerCase()));
+    const hasInvite = security.blockInvites && /discord(?:\.gg|\.com\/invite)\//i.test(content);
+    const hasLink = security.blockLinks && /(https?:\/\/|www\.)/i.test(content);
+    const capsLetters = content.replace(/[^a-zA-Z]/g, "");
+    const capsRatio = capsLetters.length ? capsLetters.replace(/[^A-Z]/g, "").length / capsLetters.length : 0;
+    const hasCaps = security.blockCaps && capsLetters.length >= 14 && capsRatio >= 0.75;
+
+    if (!hasBlockedWord && !hasInvite && !hasLink && !hasCaps) {
+      return false;
+    }
+
+    await message.delete().catch(() => undefined);
+    const reason = hasBlockedWord
+      ? "palavra bloqueada"
+      : hasInvite
+        ? "convite externo"
+        : hasLink
+          ? "link externo"
+          : "caps lock";
+
+    const timeoutMs = Number(security.timeoutMinutes || 0) * 60 * 1000;
+    if (timeoutMs > 0 && message.member && message.member.moderatable) {
+      await message.member.timeout(timeoutMs, `Automod Baile da Selva: ${reason}`).catch(() => undefined);
+    }
+
+    const warning = await message.channel.send({
+      content: `<@${message.author.id}>, sua mensagem foi removida pelo automod: ${reason}.`
+    }).catch(() => null);
+    if (warning) {
+      setTimeout(() => warning.delete().catch(() => undefined), 6000);
+    }
+
+    await this.db.addEvent("automod_block", { userId: message.author.id, reason });
+    const logChannel = await this.fetchChannel(security.logChannelId || config.modLogChannelId);
+    if (logChannel) {
+      await logChannel.send({
+        embeds: [
+          brandEmbed(config)
+            .setTitle("Automod acionado")
+            .addFields(
+              { name: "Usuario", value: `<@${message.author.id}>`, inline: true },
+              { name: "Motivo", value: reason, inline: true },
+              { name: "Canal", value: `<#${message.channelId}>`, inline: true }
+            )
+        ]
+      }).catch(() => undefined);
+    }
+    return true;
+  }
+
+  async handlePrefixCommand(message, config) {
+    const prefix = (config.botIdentity && config.botIdentity.prefix) || "bs!";
+    if (!prefix || !message.content.startsWith(prefix)) {
+      return false;
+    }
+
+    const args = message.content.slice(prefix.length).trim().split(/\s+/).filter(Boolean);
+    const command = String(args.shift() || "").toLowerCase();
+    const entertainment = config.modules && config.modules.entertainment;
+
+    if (!command) {
+      return false;
+    }
+
+    if (entertainment && entertainment.commandChannelId && message.channelId !== entertainment.commandChannelId) {
+      await message.reply(`Use comandos em <#${entertainment.commandChannelId}>.`).catch(() => undefined);
+      return true;
+    }
+
+    if (command === "ajuda" || command === "help") {
+      await message.reply([
+        `Comandos do ${config.brandName}:`,
+        `${prefix}ping - testa o bot`,
+        `${prefix}status - mostra o painel`,
+        `${prefix}ticket - instrui a abrir ticket`,
+        `${prefix}caraoucoroa - sorteia cara ou coroa`,
+        `${prefix}8ball pergunta - responde uma pergunta`
+      ].join("\n")).catch(() => undefined);
+      return true;
+    }
+
+    if (command === "ping") {
+      await message.reply("Pong. Bot online.").catch(() => undefined);
+      return true;
+    }
+
+    if (command === "status") {
+      await message.reply(`Bot online. Painel: ${config.panelBaseUrl}`).catch(() => undefined);
+      return true;
+    }
+
+    if (command === "ticket") {
+      await message.reply("Use o painel de ticket enviado pela equipe para abrir atendimento.").catch(() => undefined);
+      return true;
+    }
+
+    if (command === "caraoucoroa" && (!entertainment || entertainment.coinflipEnabled)) {
+      await message.reply(Math.random() >= 0.5 ? "Cara" : "Coroa").catch(() => undefined);
+      return true;
+    }
+
+    if ((command === "8ball" || command === "bola8") && (!entertainment || entertainment.eightBallEnabled)) {
+      const answers = [
+        "Sim.",
+        "Nao.",
+        "Talvez.",
+        "Com certeza.",
+        "Melhor perguntar para a equipe."
+      ];
+      await message.reply(answers[Math.floor(Math.random() * answers.length)]).catch(() => undefined);
+      return true;
+    }
+
+    return false;
+  }
+
+  async handleAutoResponder(message, config) {
+    const community = config.modules && config.modules.community;
+    if (!community || !community.enabled || !community.autoResponderRules) {
+      return;
+    }
+
+    const rules = String(community.autoResponderRules || "")
+      .split(/\r?\n/)
+      .map((line) => line.split("=>").map((part) => part.trim()))
+      .filter((parts) => parts.length >= 2 && parts[0] && parts[1]);
+
+    const content = String(message.content || "").toLowerCase();
+    const rule = rules.find(([trigger]) => content.includes(trigger.toLowerCase()));
+    if (!rule) {
+      return;
+    }
+
+    await message.reply(rule.slice(1).join("=>").replaceAll("{user}", `<@${message.author.id}>`)).catch(() => undefined);
   }
 
   async handleModal(interaction) {
@@ -646,8 +842,8 @@ class DiscordBot {
       .setDescription(product.description || "Pedido aberto.")
       .addFields(
         { name: "Cliente", value: `<@${interaction.user.id}>`, inline: true },
-        { name: "Valor", value: `${config.store.currency} ${product.price}`, inline: true },
-        { name: "Pagamento", value: truncate(config.store.paymentInstructions, 1000), inline: false }
+        { name: "Detalhe", value: [config.store.currency, product.price].filter(Boolean).join(" ") || "Interno", inline: true },
+        { name: "Orientacao", value: truncate(config.store.paymentInstructions, 1000), inline: false }
       );
 
     await channel.send({
@@ -674,7 +870,7 @@ class DiscordBot {
 
     const product = (config.store.products || []).find((item) => item.id === order.productId) || {};
     const statusByAction = {
-      paid: "paid",
+      paid: "checked",
       deliver: "delivered",
       cancel: "cancelled"
     };
@@ -705,7 +901,39 @@ class DiscordBot {
       return;
     }
 
-    await interaction.reply({ content: "Pagamento marcado como recebido." });
+    await interaction.reply({ content: "Pedido marcado como conferido." });
+  }
+
+  async handleVoiceState(oldState, newState) {
+    const config = await this.db.getConfig();
+    const movcall = config.modules && config.modules.movcall;
+    if (!movcall || !movcall.enabled || !movcall.creatorChannelId) {
+      return;
+    }
+
+    if (newState.channelId === movcall.creatorChannelId && newState.member) {
+      const guild = newState.guild;
+      const name = String(movcall.channelNameTemplate || "Call de {user}")
+        .replaceAll("{user}", newState.member.displayName || newState.member.user.username);
+      const channel = await guild.channels.create({
+        name: name.slice(0, 90),
+        type: ChannelType.GuildVoice,
+        parent: movcall.categoryId || newState.channel.parentId || undefined,
+        userLimit: Number(movcall.defaultUserLimit || 0) || undefined
+      });
+      this.tempVoiceChannels.set(channel.id, newState.member.id);
+      await newState.setChannel(channel).catch(() => undefined);
+      await this.db.addEvent("temp_voice_created", { channelId: channel.id, ownerId: newState.member.id });
+    }
+
+    if (oldState.channelId && this.tempVoiceChannels.has(oldState.channelId)) {
+      const channel = oldState.guild.channels.cache.get(oldState.channelId);
+      if (channel && channel.members.size === 0) {
+        this.tempVoiceChannels.delete(oldState.channelId);
+        await channel.delete("Call temporaria vazia").catch(() => undefined);
+        await this.db.addEvent("temp_voice_deleted", { channelId: oldState.channelId });
+      }
+    }
   }
 
   async deliverProduct(interaction, order, product, config) {

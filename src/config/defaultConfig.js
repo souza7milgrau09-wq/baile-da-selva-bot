@@ -4,8 +4,99 @@ const defaultConfig = {
   brandName: "Baile da Selva",
   panelBaseUrl: "http://127.0.0.1:3000",
   accentColor: "#24c46b",
+  botIdentity: {
+    name: "Baile da Selva",
+    prefix: "bs!",
+    language: "pt-BR",
+    tagline: "Painel privado do bot do Baile da Selva",
+    avatarUrl: "",
+    bannerUrl: ""
+  },
   staffRoleIds: [],
   modLogChannelId: "",
+  modules: {
+    security: {
+      enabled: true,
+      automodEnabled: true,
+      blockInvites: true,
+      blockLinks: false,
+      blockCaps: false,
+      blockedWords: [],
+      timeoutMinutes: 0,
+      logChannelId: ""
+    },
+    server: {
+      enabled: true,
+      rulesChannelId: "",
+      announcementsChannelId: "",
+      memberLogChannelId: "",
+      statsEnabled: false,
+      statsChannelId: "",
+      slowmodeSeconds: 0
+    },
+    community: {
+      enabled: true,
+      levelingEnabled: false,
+      xpPerMessage: 10,
+      suggestionsChannelId: "",
+      giveawaysChannelId: "",
+      reactionRolesNote: "",
+      autoResponderRules: ""
+    },
+    entertainment: {
+      enabled: true,
+      funCommandsEnabled: true,
+      coinflipEnabled: true,
+      eightBallEnabled: true,
+      commandChannelId: "",
+      blockedChannels: []
+    },
+    vips: {
+      enabled: true,
+      vipRoleId: "",
+      vipChannelId: "",
+      syncWithStore: true,
+      benefits: [
+        "Cargo VIP no Discord",
+        "Atendimento prioritario",
+        "Acesso a areas especiais"
+      ],
+      welcomeVipMessage: "VIP liberado para {user}. Aproveite os beneficios do Baile da Selva!"
+    },
+    movcall: {
+      enabled: false,
+      creatorChannelId: "",
+      categoryId: "",
+      defaultUserLimit: 0,
+      channelNameTemplate: "Call de {user}",
+      allowOwnerLock: true
+    },
+    checkers: {
+      enabled: false,
+      channelId: "",
+      rankingEnabled: true,
+      allowSpectators: true,
+      winRoleId: "",
+      rulesText: "Partidas organizadas pela equipe do Baile da Selva."
+    },
+    tools: {
+      enabled: true,
+      embedBuilderEnabled: true,
+      scheduledMessagesEnabled: false,
+      stickyMessagesEnabled: false,
+      autoPurgeEnabled: false,
+      purgeChannelIds: [],
+      backupNote: "Use esta area para anotar rotinas de backup e limpeza."
+    },
+    conversions: {
+      enabled: true,
+      calculatorEnabled: true,
+      robuxRate: "1000 Robux = R$ 35",
+      taxPercent: 30,
+      resultChannelId: "",
+      notes: "Modulo interno. Sem assinatura ou cobranca para usar o painel."
+    }
+  },
   ticket: {
     enabled: true,
     panelChannelId: "",
@@ -48,15 +139,15 @@ const defaultConfig = {
     panelChannelId: "",
     orderCategoryId: "",
     orderLogChannelId: "",
-    currency: "R$",
-    paymentInstructions: "A equipe vai passar as instrucoes de pagamento neste pedido.",
+    currency: "",
+    paymentInstructions: "A equipe vai orientar o pedido neste canal.",
     panelTitle: "Loja Baile da Selva",
-    panelDescription: "Escolha um item e abra um pedido com a equipe.",
+    panelDescription: "Escolha um item interno e abra um pedido com a equipe.",
     products: [
       {
         id: "vip",
         name: "VIP Selva",
-        price: "9,90",
+        price: "Beneficio interno",
         description: "Cargo VIP no Discord e beneficios combinados com a equipe.",
         deliveryText: "Seu VIP foi entregue. Obrigado por apoiar o Baile da Selva!",
         roleId: "",

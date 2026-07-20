@@ -81,18 +81,18 @@ function formReviewControls(submissionId, disabled = false) {
 
 function storePanel(config) {
   const embed = brandEmbed(config)
-    .setTitle(config.store.panelTitle || "Loja")
-    .setDescription(config.store.panelDescription || "Escolha um produto abaixo.");
+    .setTitle(config.store.panelTitle || "Loja interna")
+    .setDescription(config.store.panelDescription || "Escolha um item abaixo.");
 
   const rows = [];
   const products = (config.store.products || []).filter((product) => product.enabled).slice(0, 25);
   const fields = products.map((product) => ({
-    name: `${product.name} - ${config.store.currency} ${product.price}`,
+    name: [product.name, [config.store.currency, product.price].filter(Boolean).join(" ")].filter(Boolean).join(" - "),
     value: truncate(product.description || "Sem descricao.", 250),
     inline: false
   }));
 
-  embed.addFields(fields.length ? fields : [{ name: "Nenhum produto ativo", value: "Cadastre produtos no painel." }]);
+  embed.addFields(fields.length ? fields : [{ name: "Nenhum item ativo", value: "Cadastre itens no painel." }]);
 
   for (let index = 0; index < products.length; index += 5) {
     const row = new ActionRowBuilder();
@@ -114,7 +114,7 @@ function orderControls(orderId, disabled = false) {
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`order:paid:${orderId}`)
-      .setLabel("Pago")
+      .setLabel("Conferido")
       .setStyle(ButtonStyle.Primary)
       .setDisabled(disabled),
     new ButtonBuilder()

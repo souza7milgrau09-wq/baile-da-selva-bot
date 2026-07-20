@@ -1,8 +1,20 @@
 <%- include("partials/header") %>
 
+<section class="profile-banner compact-banner">
+  <div class="profile-avatar"><%= ((config.botIdentity && config.botIdentity.name) || config.brandName || "B").slice(0, 1).toUpperCase() %></div>
+  <div>
+    <p class="eyebrow">Perfil do bot</p>
+    <h2><%= (config.botIdentity && config.botIdentity.name) || "Baile da Selva" %></h2>
+    <p>Ajuste a identidade visual e os dados principais usados pelo painel e pelos comandos.</p>
+  </div>
+</section>
+
 <section class="panel wide">
   <div class="panel-head">
-    <h2>Identidade e acesso</h2>
+    <div>
+      <p class="eyebrow">Bot</p>
+      <h2>Identidade e acesso</h2>
+    </div>
   </div>
   <form method="post" action="/settings" class="form-grid">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -11,8 +23,28 @@
       <input name="brandName" value="<%= config.brandName %>" required>
     </label>
     <label>
+      Nome do bot
+      <input name="botName" value="<%= config.botIdentity && config.botIdentity.name ? config.botIdentity.name : config.brandName %>" required>
+    </label>
+    <label>
+      Prefixo
+      <input name="prefix" value="<%= config.botIdentity && config.botIdentity.prefix ? config.botIdentity.prefix : 'bs!' %>" maxlength="8">
+    </label>
+    <label>
+      Idioma
+      <input name="language" value="<%= config.botIdentity && config.botIdentity.language ? config.botIdentity.language : 'pt-BR' %>">
+    </label>
+    <label>
       Cor principal
       <input type="color" name="accentColor" value="<%= config.accentColor %>">
+    </label>
+    <label>
+      Avatar por URL
+      <input name="avatarUrl" value="<%= config.botIdentity && config.botIdentity.avatarUrl ? config.botIdentity.avatarUrl : '' %>" placeholder="https://...">
+    </label>
+    <label>
+      Banner por URL
+      <input name="bannerUrl" value="<%= config.botIdentity && config.botIdentity.bannerUrl ? config.botIdentity.bannerUrl : '' %>" placeholder="https://...">
     </label>
     <label>
       ID do servidor
@@ -29,6 +61,10 @@
     <label>
       Canal de logs gerais
       <input name="modLogChannelId" value="<%= config.modLogChannelId %>" placeholder="ID do canal">
+    </label>
+    <label class="full">
+      Texto curto do painel
+      <textarea name="tagline" rows="3"><%= config.botIdentity && config.botIdentity.tagline ? config.botIdentity.tagline : '' %></textarea>
     </label>
     <label class="full">
       Cargos da equipe

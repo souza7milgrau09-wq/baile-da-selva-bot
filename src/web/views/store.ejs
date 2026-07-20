@@ -3,7 +3,7 @@
 <section class="grid-two">
   <div class="panel">
     <div class="panel-head">
-      <h2>Configuracao da loja</h2>
+      <h2>Loja interna</h2>
     </div>
     <form method="post" action="/store/settings" class="stack">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -24,8 +24,8 @@
         <input name="orderLogChannelId" value="<%= config.store.orderLogChannelId %>" placeholder="ID do canal">
       </label>
       <label>
-        Moeda
-        <input name="currency" value="<%= config.store.currency %>">
+        Prefixo do detalhe
+        <input name="currency" value="<%= config.store.currency %>" placeholder="Opcional, ex: VIP">
       </label>
       <label>
         Titulo do painel
@@ -36,7 +36,7 @@
         <textarea name="panelDescription" rows="4"><%= config.store.panelDescription %></textarea>
       </label>
       <label>
-        Instrucoes de pagamento
+        Instrucoes do pedido
         <textarea name="paymentInstructions" rows="5"><%= config.store.paymentInstructions %></textarea>
       </label>
       <div class="form-actions">
@@ -51,7 +51,7 @@
           Canal
           <input name="channelId" value="<%= config.store.panelChannelId %>" placeholder="ID do canal">
         </label>
-        <button type="submit" class="secondary-button">Enviar painel da loja</button>
+        <button type="submit" class="secondary-button">Enviar loja interna</button>
       </form>
     </div>
   </div>
@@ -71,8 +71,8 @@
         <input name="name" required>
       </label>
       <label>
-        Preco
-        <input name="price" placeholder="9,90" required>
+        Detalhe do item
+        <input name="price" placeholder="Beneficio interno" required>
       </label>
       <label>
         Cargo entregue
@@ -111,7 +111,7 @@
             <input name="name" value="<%= product.name %>">
           </label>
           <label>
-            Preco
+            Detalhe do item
             <input name="price" value="<%= product.price %>">
           </label>
           <label>
@@ -148,13 +148,13 @@
   </div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Cliente</th><th>Produto</th><th>Valor</th><th>Status</th><th>Criado</th></tr></thead>
+      <thead><tr><th>Membro</th><th>Item</th><th>Detalhe</th><th>Status</th><th>Criado</th></tr></thead>
       <tbody>
         <% orders.forEach((order) => { %>
           <tr>
             <td><%= order.userTag %></td>
             <td><%= order.productName %></td>
-            <td><%= config.store.currency %> <%= order.productPrice %></td>
+            <td><%= [config.store.currency, order.productPrice].filter(Boolean).join(" ") %></td>
             <td><span class="badge"><%= order.status %></span></td>
             <td><%= formatDate(order.createdAt) %></td>
           </tr>

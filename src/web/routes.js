@@ -1,6 +1,29 @@
 const express = require("express");
+const { findModule, moduleCatalog } = require("../config/moduleCatalog");
 const { setFlash } = require("./middleware/auth");
 const { boolFromForm, lines, parseIdList, shortId } = require("../utils/text");
+
+function parseModuleForm(moduleConfig, panelModule, body) {
+  const nextConfig = {};
+  for (const field of panelModule.fields) {
+    const currentValue = moduleConfig[field.name];
+    if (field.type === "checkbox") {
+      nextConfig[field.name] = boolFromForm(body[field.name]);
+      continue;
+    }
+    if (field.type === "number") {
+      const value = Number(body[field.name] || 0);
+      nextConfig[field.name] = Number.isFinite(value) ? Math.max(Number(field.min || 0), value) : 0;
+      continue;
+    }
+    if (field.type === "textarea" && Array.isArray(currentValue)) {
+      nextConfig[field.name] = lines(body[field.name], 200);
+      continue;
+    }
+    nextConfig[field.name] = String(body[field.name] || "").trim();
+  }
+  return nextConfig;
+}
 
 function createRoutes({ db, bot }) {
   const router = express.Router();
@@ -8,6 +31,7 @@ function createRoutes({ db, bot }) {
   router.use(async (req, res, next) => {
     res.locals.config = await db.getConfig();
     res.locals.botStatus = bot.getStatus();
+    res.locals.moduleCatalog = moduleCatalog;
     next();
   });
 
@@ -24,8 +48,12 @@ function createRoutes({ db, bot }) {
       stats: {
         ticketsOpen: tickets.filter((item) => item.status === "open").length,
         ticketsClosed: tickets.filter((item) => item.status === "closed").length,
-        ordersOpen: orders.filter((item) => ["open", "paid"].includes(item.status)).length,
-        formsPending: submissions.filter((item) => item.status === "pending").length
+        ordersOpen: orders.filter((item) => ["open", "paid", "checked"].includes(item.status)).length,
+        formsPending: submissions.filter((item) => item.status === "pending").length,
+        modulesActive: moduleCatalog.filter((item) => {
+          const moduleConfig = res.locals.config.modules && res.locals.config.modules[item.key];
+          return moduleConfig && moduleConfig.enabled;
+        }).length
       },
       tickets: tickets.slice(0, 5),
       orders: orders.slice(0, 5),
@@ -44,6 +72,14 @@ function createRoutes({ db, bot }) {
       brandName: String(req.body.brandName || "Baile da Selva").trim(),
       panelBaseUrl: String(req.body.panelBaseUrl || "").trim(),
       accentColor: String(req.body.accentColor || "#24c46b").trim(),
+      botIdentity: {
+        name: String(req.body.botName || req.body.brandName || "Baile da Selva").trim(),
+        prefix: String(req.body.prefix || "bs!").trim().slice(0, 8),
+        language: String(req.body.language || "pt-BR").trim(),
+        tagline: String(req.body.tagline || "").trim(),
+        avatarUrl: String(req.body.avatarUrl || "").trim(),
+        bannerUrl: String(req.body.bannerUrl || "").trim()
+      },
       staffRoleIds: parseIdList(req.body.staffRoleIds),
       modLogChannelId: String(req.body.modLogChannelId || "").trim()
     });
@@ -59,6 +95,37 @@ function createRoutes({ db, bot }) {
       setFlash(req, "error", error.message);
     }
     res.redirect("/");
+  });
+
+  router.get("/modules/:moduleKey", (req, res, next) => {
+    const panelModule = findModule(req.params.moduleKey);
+    if (!panelModule) {
+      next();
+      return;
+    }
+    res.render("modules", {
+      title: panelModule.title,
+      active: panelModule.key,
+      panelModule,
+      moduleConfig: (res.locals.config.modules && res.locals.config.modules[panelModule.key]) || {}
+    });
+  });
+
+  router.post("/modules/:moduleKey", async (req, res, next) => {
+    const panelModule = findModule(req.params.moduleKey);
+    if (!panelModule) {
+      next();
+      return;
+    }
+    const config = await db.getConfig();
+    const currentModuleConfig = (config.modules && config.modules[panelModule.key]) || {};
+    await db.setConfig({
+      modules: {
+        [panelModule.key]: parseModuleForm(currentModuleConfig, panelModule, req.body)
+      }
+    });
+    setFlash(req, "success", `${panelModule.title} salvo.`);
+    res.redirect(`/modules/${panelModule.key}`);
   });
 
   router.get("/tickets", async (req, res) => {
@@ -165,7 +232,7 @@ function createRoutes({ db, bot }) {
   router.get("/store", async (req, res) => {
     const orders = await db.read("orders");
     res.render("store", {
-      title: "Loja",
+      title: "Loja interna",
       active: "store",
       orders: orders.slice(0, 50)
     });
@@ -186,7 +253,7 @@ function createRoutes({ db, bot }) {
         panelDescription: String(req.body.panelDescription || "").trim()
       }
     });
-    setFlash(req, "success", "Loja atualizada.");
+    setFlash(req, "success", "Loja interna atualizada.");
     res.redirect("/store");
   });
 
@@ -195,7 +262,7 @@ function createRoutes({ db, bot }) {
     const product = {
       id: shortId("prod"),
       name: String(req.body.name || "Produto").trim(),
-      price: String(req.body.price || "0,00").trim(),
+      price: String(req.body.price || "Beneficio interno").trim(),
       description: String(req.body.description || "").trim(),
       deliveryText: String(req.body.deliveryText || "").trim(),
       roleId: String(req.body.roleId || "").trim(),

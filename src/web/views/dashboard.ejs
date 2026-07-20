@@ -1,5 +1,19 @@
 <%- include("partials/header") %>
 
+<section class="profile-banner">
+  <div class="profile-avatar"><%= ((config.botIdentity && config.botIdentity.name) || config.brandName || "B").slice(0, 1).toUpperCase() %></div>
+  <div>
+    <p class="eyebrow">Personalizacao do bot</p>
+    <h2><%= (config.botIdentity && config.botIdentity.name) || "Baile da Selva" %></h2>
+    <p><%= (config.botIdentity && config.botIdentity.tagline) || "Painel privado do Baile da Selva, sem planos ou assinaturas." %></p>
+    <div class="chip-row">
+      <span class="chip">Prefixo <strong><%= config.botIdentity && config.botIdentity.prefix ? config.botIdentity.prefix : "bs!" %></strong></span>
+      <span class="chip">Idioma <strong><%= config.botIdentity && config.botIdentity.language ? config.botIdentity.language : "pt-BR" %></strong></span>
+      <span class="chip">Uso privado</span>
+    </div>
+  </div>
+</section>
+
 <section class="stat-grid">
   <article class="stat-card">
     <span>Tickets abertos</span>
@@ -10,13 +24,35 @@
     <strong><%= stats.ticketsClosed %></strong>
   </article>
   <article class="stat-card">
-    <span>Pedidos ativos</span>
+    <span>Pedidos internos</span>
     <strong><%= stats.ordersOpen %></strong>
   </article>
   <article class="stat-card">
-    <span>Formularios pendentes</span>
-    <strong><%= stats.formsPending %></strong>
+    <span>Modulos ativos</span>
+    <strong><%= stats.modulesActive %></strong>
   </article>
+</section>
+
+<section class="panel wide">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Modulos</p>
+      <h2>Central Baile da Selva</h2>
+    </div>
+    <a href="/settings">Editar bot</a>
+  </div>
+  <div class="module-grid">
+    <% (moduleCatalog || []).forEach((item) => { %>
+      <% const moduleConfig = config.modules && config.modules[item.key] ? config.modules[item.key] : {}; %>
+      <a class="module-tile <%= moduleConfig.enabled ? 'enabled' : '' %>" href="/modules/<%= item.key %>">
+        <span class="module-icon"><%= item.icon %></span>
+        <span>
+          <strong><%= item.title %></strong>
+          <small><%= moduleConfig.enabled ? "Ativo" : "Desativado" %></small>
+        </span>
+      </a>
+    <% }) %>
+  </div>
 </section>
 
 <section class="grid-two">
@@ -28,7 +64,7 @@
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <button type="submit" class="secondary-button">Registrar comandos</button>
       <a class="secondary-link" href="/tickets">Configurar tickets</a>
-      <a class="secondary-link" href="/store">Configurar loja</a>
+      <a class="secondary-link" href="/store">Configurar loja interna</a>
     </form>
     <dl class="detail-list">
       <div><dt>Servidor</dt><dd><%= config.guildId || "Nao definido" %></dd></div>
@@ -90,7 +126,7 @@
 
   <div class="panel">
     <div class="panel-head">
-      <h2>Pedidos recentes</h2>
+      <h2>Pedidos internos recentes</h2>
       <a href="/store">Abrir</a>
     </div>
     <div class="table-wrap">
