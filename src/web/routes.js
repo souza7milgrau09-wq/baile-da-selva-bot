@@ -26,6 +26,28 @@ function parseModuleForm(moduleConfig, panelModule, body) {
   return nextConfig;
 }
 
+function parseEmbedFields(value) {
+  return String(value || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const parts = line.split(/\s*(?:=>|\|)\s*/);
+      return {
+        name: String(parts.shift() || "").trim().slice(0, 256),
+        value: String(parts.join(" ") || "").trim().slice(0, 1024)
+      };
+    })
+    .filter((field) => field.name && field.value)
+    .slice(0, 8);
+}
+
+function cleanButtonStyle(value) {
+  const allowed = new Set(["Primary", "Secondary", "Success", "Danger"]);
+  const style = String(value || "").trim();
+  return allowed.has(style) ? style : "Primary";
+}
+
 function linkedConfigPatch(moduleKey, nextModuleConfig, config) {
   if (moduleKey === "bot-profile") {
     return {
@@ -61,7 +83,14 @@ function linkedConfigPatch(moduleKey, nextModuleConfig, config) {
         panelChannelId: nextModuleConfig.channelId || config.ticket.panelChannelId,
         logChannelId: nextModuleConfig.logChannelId || config.ticket.logChannelId,
         supportRoleIds: nextModuleConfig.allowedRoleIds || config.ticket.supportRoleIds,
-        panelDescription: nextModuleConfig.panelText || config.ticket.panelDescription
+        panelTitle: nextModuleConfig.panelTitle || config.ticket.panelTitle,
+        panelSubtitle: nextModuleConfig.panelSubtitle || config.ticket.panelSubtitle,
+        panelDescription: nextModuleConfig.panelText || config.ticket.panelDescription,
+        panelColor: nextModuleConfig.panelColor || config.ticket.panelColor,
+        panelFields: parseEmbedFields(nextModuleConfig.panelFieldsText),
+        buttonLabel: nextModuleConfig.buttonLabel || config.ticket.buttonLabel,
+        buttonEmoji: nextModuleConfig.buttonEmoji || "",
+        buttonStyle: cleanButtonStyle(nextModuleConfig.buttonStyle)
       }
     };
   }
@@ -274,9 +303,21 @@ function createRoutes({ db, bot }) {
         allowMultipleTickets: boolFromForm(req.body.allowMultipleTickets),
         deleteClosedTickets: boolFromForm(req.body.deleteClosedTickets),
         panelTitle: String(req.body.panelTitle || "").trim(),
+        panelSubtitle: String(req.body.panelSubtitle || "").trim(),
         panelDescription: String(req.body.panelDescription || "").trim(),
+        panelColor: String(req.body.panelColor || "#f04452").trim(),
+        panelThumbnailUrl: String(req.body.panelThumbnailUrl || "").trim(),
+        panelImageUrl: String(req.body.panelImageUrl || "").trim(),
+        panelFooter: String(req.body.panelFooter || "").trim(),
+        panelFields: parseEmbedFields(req.body.panelFields),
         buttonLabel: String(req.body.buttonLabel || "Abrir ticket").trim(),
-        openedMessage: String(req.body.openedMessage || "").trim()
+        buttonEmoji: String(req.body.buttonEmoji || "").trim(),
+        buttonStyle: cleanButtonStyle(req.body.buttonStyle),
+        openedTitle: String(req.body.openedTitle || "Ticket aberto").trim(),
+        openedMessage: String(req.body.openedMessage || "").trim(),
+        openedFooter: String(req.body.openedFooter || "").trim(),
+        ticketNamePattern: String(req.body.ticketNamePattern || "ticket-{user}-{id}").trim(),
+        mentionSupport: boolFromForm(req.body.mentionSupport)
       }
     });
     setFlash(req, "success", "Tickets atualizados.");

@@ -27,6 +27,7 @@ const {
 const {
   cleanChannelName,
   formatDate,
+  hexToInt,
   shortId,
   truncate
 } = require("../utils/text");
@@ -547,7 +548,11 @@ class DiscordBot {
     await interaction.deferReply({ ephemeral: true });
     const guild = interaction.guild || await this.fetchGuild();
     const ticketId = shortId("ticket");
-    const channelName = cleanChannelName(`ticket-${interaction.user.username}-${ticketId.slice(-4)}`);
+    const channelName = cleanChannelName(
+      String(config.ticket.ticketNamePattern || "ticket-{user}-{id}")
+        .replaceAll("{user}", interaction.user.username)
+        .replaceAll("{id}", ticketId.slice(-4))
+    );
     const supportRoleIds = [...new Set([...(config.ticket.supportRoleIds || []), ...(config.staffRoleIds || [])])];
     const overwrites = [
       {
@@ -612,15 +617,21 @@ class DiscordBot {
     await this.db.addEvent("ticket_opened", { ticketId, userId: interaction.user.id });
 
     const embed = brandEmbed(config)
-      .setTitle(`Ticket de ${interaction.user.username}`)
+      .setColor(hexToInt(config.ticket.panelColor || config.accentColor))
+      .setTitle(config.ticket.openedTitle || `Ticket de ${interaction.user.username}`)
       .setDescription(config.ticket.openedMessage)
       .addFields(
         { name: "Usuario", value: `<@${interaction.user.id}>`, inline: true },
-        { name: "Status", value: "Aberto", inline: true }
-      );
+        { name: "Status", value: "Aberto", inline: true },
+        { name: "Ticket", value: ticketId, inline: true }
+      )
+      .setFooter({ text: config.ticket.openedFooter || config.ticket.panelFooter || config.brandName });
 
     await channel.send({
-      content: `<@${interaction.user.id}> ${supportRoleIds.map((roleId) => `<@&${roleId}>`).join(" ")}`.trim(),
+      content: [
+        `<@${interaction.user.id}>`,
+        config.ticket.mentionSupport ? supportRoleIds.map((roleId) => `<@&${roleId}>`).join(" ") : ""
+      ].filter(Boolean).join(" ").trim(),
       embeds: [embed],
       components: ticketControls(ticketId)
     });

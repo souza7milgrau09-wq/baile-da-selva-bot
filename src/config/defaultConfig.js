@@ -28,9 +28,30 @@ const defaultConfig = {
     allowMultipleTickets: false,
     deleteClosedTickets: false,
     panelTitle: "Atendimento Baile da Selva",
-    panelDescription: "Abra um ticket para suporte, parceria, denuncia ou duvida.",
+    panelSubtitle: "Central de atendimento",
+    panelDescription: "Precisa de ajuda? Abra um ticket e fale com a equipe do Baile da Selva.",
+    panelColor: "#f04452",
+    panelThumbnailUrl: "",
+    panelImageUrl: "",
+    panelFooter: "Baile da Selva - Atendimento",
+    panelFields: [
+      {
+        name: "Como funciona",
+        value: "Clique no botao abaixo, explique sua situacao e aguarde um membro da equipe."
+      },
+      {
+        name: "Atendimentos",
+        value: "Suporte, denuncia, parceria, loja interna e duvidas gerais."
+      }
+    ],
     buttonLabel: "Abrir ticket",
-    openedMessage: "Obrigado por chamar a equipe. Descreva seu problema com detalhes."
+    buttonEmoji: "",
+    buttonStyle: "Primary",
+    openedTitle: "Ticket aberto",
+    openedMessage: "Obrigado por chamar a equipe. Descreva seu problema com detalhes, envie prints se precisar e aguarde atendimento.",
+    openedFooter: "Use os botoes abaixo para assumir, fechar ou apagar o ticket.",
+    ticketNamePattern: "ticket-{user}-{id}",
+    mentionSupport: true
   },
   forms: {
     enabled: false,

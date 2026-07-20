@@ -42,6 +42,7 @@ a {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -156,6 +157,7 @@ code {
 
 .nav-search input,
 input,
+select,
 textarea {
   width: 100%;
   border: 1px solid var(--line);
@@ -638,6 +640,7 @@ textarea {
 }
 
 input:focus,
+select:focus,
 textarea:focus {
   border-color: var(--red);
   box-shadow: 0 0 0 3px rgba(240, 68, 82, 0.14);
@@ -793,6 +796,54 @@ td {
   display: grid;
   justify-items: start;
   gap: 12px;
+}
+
+.discord-preview {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #2c2f35;
+  border-left: 4px solid var(--red);
+  border-radius: 8px;
+  background: #16181d;
+  color: #eff2f5;
+}
+
+.discord-preview h3,
+.discord-preview p {
+  margin: 0;
+}
+
+.discord-preview p,
+.discord-preview span,
+.discord-preview small {
+  color: #b8bec8;
+  line-height: 1.5;
+}
+
+.preview-author {
+  color: #f2f4f8 !important;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.preview-field {
+  display: grid;
+  gap: 4px;
+}
+
+.preview-field strong {
+  font-size: 13px;
+}
+
+.preview-image {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed #3d424b;
+  border-radius: 8px;
+  color: #87909c;
+  background: #111318;
 }
 
 .login-page {

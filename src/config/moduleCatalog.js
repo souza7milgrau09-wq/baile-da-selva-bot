@@ -361,7 +361,26 @@ const categoryCatalog = [
     title: "Ticket",
     icon: "TK",
     items: [
-      { key: "ticket-panel", title: "Painel de Tickets", description: "Botao para membros abrirem atendimento.", cards: [statusCard("Ativa abertura de tickets."), channelCard(), permissionCard(), textCard("Texto do Painel", "panelText", "Texto")] },
+      {
+        key: "ticket-panel",
+        title: "Painel de Tickets",
+        description: "Botao para membros abrirem atendimento com embed profissional.",
+        cards: [
+          statusCard("Ativa abertura de tickets."),
+          channelCard(),
+          permissionCard(),
+          rulesCard([
+            { name: "panelTitle", label: "Titulo do embed", type: "text", placeholder: "Atendimento Baile da Selva" },
+            { name: "panelSubtitle", label: "Subtitulo/autor", type: "text", placeholder: "Central de atendimento" },
+            { name: "panelColor", label: "Cor do embed", type: "text", placeholder: "#f04452" },
+            { name: "buttonLabel", label: "Texto do botao", type: "text", placeholder: "Abrir ticket" },
+            { name: "buttonEmoji", label: "Emoji do botao", type: "text", placeholder: "Opcional" },
+            { name: "buttonStyle", label: "Estilo do botao", type: "text", placeholder: "Primary, Secondary, Success ou Danger" }
+          ]),
+          textCard("Texto do Painel", "panelText", "Descricao do embed"),
+          textCard("Campos Extras", "panelFieldsText", "Campos", "Como funciona => Clique no botao\nAtendimentos => Suporte e denuncia")
+        ]
+      },
       { key: "ticket-categories", title: "Categorias", description: "Categorias por tipo de atendimento.", cards: [statusCard("Ativa categorias de ticket."), rulesCard([{ name: "categoryId", label: "Categoria padrao", type: "text", placeholder: "ID da categoria" }]), textCard("Opcoes", "ticketTypes", "Tipos de ticket", "Suporte\nParceria\nDenuncia")] },
       { key: "ticket-transcripts", title: "Transcripts", description: "Registro ao fechar tickets.", cards: [statusCard("Ativa transcripts."), channelCard(), rulesCard([{ name: "sendToUser", label: "Enviar transcript ao membro", type: "checkbox" }, { name: "deleteClosedTicket", label: "Apagar canal fechado", type: "checkbox" }])] },
       { key: "ticket-forms", title: "Formularios", description: "Perguntas antes de abrir ticket.", cards: [statusCard("Ativa formulario de ticket."), channelCard(), textCard("Perguntas", "questions", "Perguntas", "Uma pergunta por linha")] },

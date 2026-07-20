@@ -6,6 +6,17 @@ const {
 } = require("discord.js");
 const { hexToInt, truncate } = require("../utils/text");
 
+const buttonStyles = {
+  Primary: ButtonStyle.Primary,
+  Secondary: ButtonStyle.Secondary,
+  Success: ButtonStyle.Success,
+  Danger: ButtonStyle.Danger
+};
+
+function isHttpUrl(value) {
+  return /^https?:\/\//i.test(String(value || "").trim());
+}
+
 function brandEmbed(config) {
   return new EmbedBuilder()
     .setColor(hexToInt(config.accentColor))
@@ -14,15 +25,45 @@ function brandEmbed(config) {
 }
 
 function ticketPanel(config) {
+  const ticket = config.ticket || {};
   const embed = brandEmbed(config)
-    .setTitle(config.ticket.panelTitle)
-    .setDescription(config.ticket.panelDescription);
+    .setColor(hexToInt(ticket.panelColor || config.accentColor))
+    .setTitle(truncate(ticket.panelTitle || "Atendimento", 256))
+    .setDescription(truncate(ticket.panelDescription || "Abra um ticket com a equipe.", 4000));
+
+  if (ticket.panelSubtitle) {
+    embed.setAuthor({ name: truncate(ticket.panelSubtitle, 256) });
+  }
+  if (ticket.panelThumbnailUrl && isHttpUrl(ticket.panelThumbnailUrl)) {
+    embed.setThumbnail(ticket.panelThumbnailUrl);
+  }
+  if (ticket.panelImageUrl && isHttpUrl(ticket.panelImageUrl)) {
+    embed.setImage(ticket.panelImageUrl);
+  }
+  if (ticket.panelFooter) {
+    embed.setFooter({ text: truncate(ticket.panelFooter, 2048) });
+  }
+
+  const fields = (ticket.panelFields || []).slice(0, 8).map((field) => ({
+    name: truncate(field.name, 256),
+    value: truncate(field.value, 1024),
+    inline: false
+  }));
+  if (fields.length) {
+    embed.addFields(fields);
+  }
+
+  const button = new ButtonBuilder()
+    .setCustomId("ticket:open")
+    .setLabel(truncate(ticket.buttonLabel || "Abrir ticket", 80))
+    .setStyle(buttonStyles[ticket.buttonStyle] || ButtonStyle.Primary);
+
+  if (ticket.buttonEmoji) {
+    button.setEmoji(ticket.buttonEmoji);
+  }
 
   const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId("ticket:open")
-      .setLabel(config.ticket.buttonLabel || "Abrir ticket")
-      .setStyle(ButtonStyle.Success)
+    button
   );
 
   return { embeds: [embed], components: [row] };

@@ -1,78 +1,209 @@
 <%- include("partials/header") %>
 
+<section class="profile-banner compact-banner">
+  <div class="profile-avatar">TK</div>
+  <div>
+    <p class="eyebrow">Ticket profissional</p>
+    <h2><%= config.ticket.panelTitle || "Atendimento Baile da Selva" %></h2>
+    <p>Configure o painel, o embed, o botao e a mensagem que aparece dentro do canal do ticket.</p>
+    <div class="chip-row">
+      <span class="chip"><%= config.ticket.enabled ? "Ativo" : "Desativado" %></span>
+      <span class="chip">Embed Discord</span>
+      <span class="chip">Editavel no painel</span>
+    </div>
+  </div>
+</section>
+
 <section class="grid-two">
   <div class="panel">
     <div class="panel-head">
-      <h2>Configuracao</h2>
+      <div>
+        <p class="eyebrow">Editor</p>
+        <h2>Painel de ticket</h2>
+      </div>
     </div>
+
     <form method="post" action="/tickets" class="stack">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <label class="switch">
-        <input type="checkbox" name="enabled" <%= config.ticket.enabled ? "checked" : "" %>>
-        <span>Tickets ativos</span>
-      </label>
-      <label>
-        Canal do painel
-        <input name="panelChannelId" value="<%= config.ticket.panelChannelId %>" placeholder="ID do canal">
-      </label>
-      <label>
-        Categoria dos tickets
-        <input name="categoryId" value="<%= config.ticket.categoryId %>" placeholder="ID da categoria">
-      </label>
-      <label>
-        Canal de logs
-        <input name="logChannelId" value="<%= config.ticket.logChannelId %>" placeholder="ID do canal">
-      </label>
-      <label>
-        Canal de transcripts
-        <input name="transcriptChannelId" value="<%= config.ticket.transcriptChannelId %>" placeholder="ID do canal">
-      </label>
-      <label>
-        Cargos de suporte
-        <textarea name="supportRoleIds" rows="3"><%= (config.ticket.supportRoleIds || []).join("\n") %></textarea>
-      </label>
-      <label>
-        Titulo do painel
-        <input name="panelTitle" value="<%= config.ticket.panelTitle %>">
-      </label>
-      <label>
-        Texto do painel
-        <textarea name="panelDescription" rows="4"><%= config.ticket.panelDescription %></textarea>
-      </label>
-      <label>
-        Texto do botao
-        <input name="buttonLabel" value="<%= config.ticket.buttonLabel %>">
-      </label>
-      <label>
-        Mensagem no ticket
-        <textarea name="openedMessage" rows="4"><%= config.ticket.openedMessage %></textarea>
-      </label>
-      <label class="switch">
-        <input type="checkbox" name="allowMultipleTickets" <%= config.ticket.allowMultipleTickets ? "checked" : "" %>>
-        <span>Permitir varios tickets por pessoa</span>
-      </label>
-      <label class="switch">
-        <input type="checkbox" name="deleteClosedTickets" <%= config.ticket.deleteClosedTickets ? "checked" : "" %>>
-        <span>Apagar canal apos fechar</span>
-      </label>
+
+      <div class="config-card">
+        <div class="config-card-head">
+          <span class="card-icon">ON</span>
+          <div>
+            <h2>Status e canais</h2>
+            <p>Defina onde o painel sera enviado e onde os tickets serao criados.</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label class="switch full">
+            <input type="checkbox" name="enabled" <%= config.ticket.enabled ? "checked" : "" %>>
+            <span>Tickets ativos</span>
+          </label>
+          <label>
+            Canal do painel
+            <input name="panelChannelId" value="<%= config.ticket.panelChannelId %>" placeholder="ID do canal onde vai aparecer o embed">
+          </label>
+          <label>
+            Categoria dos tickets
+            <input name="categoryId" value="<%= config.ticket.categoryId %>" placeholder="ID da categoria dos canais">
+          </label>
+          <label>
+            Canal de logs
+            <input name="logChannelId" value="<%= config.ticket.logChannelId %>" placeholder="ID do canal de logs">
+          </label>
+          <label>
+            Canal de transcripts
+            <input name="transcriptChannelId" value="<%= config.ticket.transcriptChannelId %>" placeholder="ID do canal de transcripts">
+          </label>
+          <label class="full">
+            Cargos de suporte
+            <textarea name="supportRoleIds" rows="3" placeholder="Um ID de cargo por linha"><%= (config.ticket.supportRoleIds || []).join("\n") %></textarea>
+          </label>
+        </div>
+      </div>
+
+      <div class="config-card">
+        <div class="config-card-head">
+          <span class="card-icon">EM</span>
+          <div>
+            <h2>Embed do painel</h2>
+            <p>Essa e a mensagem bonita que o bot envia no canal de atendimento.</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label>
+            Titulo
+            <input name="panelTitle" value="<%= config.ticket.panelTitle %>" placeholder="Atendimento Baile da Selva">
+          </label>
+          <label>
+            Subtitulo/autor
+            <input name="panelSubtitle" value="<%= config.ticket.panelSubtitle || '' %>" placeholder="Central de atendimento">
+          </label>
+          <label class="full">
+            Descricao
+            <textarea name="panelDescription" rows="5"><%= config.ticket.panelDescription %></textarea>
+          </label>
+          <label>
+            Cor do embed
+            <input type="color" name="panelColor" value="<%= config.ticket.panelColor || config.accentColor %>">
+          </label>
+          <label>
+            Rodape
+            <input name="panelFooter" value="<%= config.ticket.panelFooter || '' %>" placeholder="Baile da Selva - Atendimento">
+          </label>
+          <label>
+            Thumbnail por URL
+            <input name="panelThumbnailUrl" value="<%= config.ticket.panelThumbnailUrl || '' %>" placeholder="https://...">
+          </label>
+          <label>
+            Imagem/banner por URL
+            <input name="panelImageUrl" value="<%= config.ticket.panelImageUrl || '' %>" placeholder="https://...">
+          </label>
+          <label class="full">
+            Campos extras do embed
+            <textarea name="panelFields" rows="5" placeholder="Como funciona => Clique no botao abaixo&#10;Atendimentos => Suporte, denuncia e parceria"><%= (config.ticket.panelFields || []).map((field) => `${field.name} => ${field.value}`).join("\n") %></textarea>
+          </label>
+        </div>
+      </div>
+
+      <div class="config-card">
+        <div class="config-card-head">
+          <span class="card-icon">BT</span>
+          <div>
+            <h2>Botao e canal aberto</h2>
+            <p>Personalize o botao e a primeira mensagem dentro do ticket.</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label>
+            Texto do botao
+            <input name="buttonLabel" value="<%= config.ticket.buttonLabel %>" placeholder="Abrir ticket">
+          </label>
+          <label>
+            Emoji do botao
+            <input name="buttonEmoji" value="<%= config.ticket.buttonEmoji || '' %>" placeholder="Opcional">
+          </label>
+          <label>
+            Estilo do botao
+            <select name="buttonStyle">
+              <% ["Primary", "Secondary", "Success", "Danger"].forEach((style) => { %>
+                <option value="<%= style %>" <%= (config.ticket.buttonStyle || "Primary") === style ? "selected" : "" %>><%= style %></option>
+              <% }) %>
+            </select>
+          </label>
+          <label>
+            Nome do canal
+            <input name="ticketNamePattern" value="<%= config.ticket.ticketNamePattern || 'ticket-{user}-{id}' %>" placeholder="ticket-{user}-{id}">
+          </label>
+          <label class="full">
+            Titulo dentro do ticket
+            <input name="openedTitle" value="<%= config.ticket.openedTitle || 'Ticket aberto' %>">
+          </label>
+          <label class="full">
+            Mensagem dentro do ticket
+            <textarea name="openedMessage" rows="5"><%= config.ticket.openedMessage %></textarea>
+          </label>
+          <label class="full">
+            Rodape dentro do ticket
+            <input name="openedFooter" value="<%= config.ticket.openedFooter || '' %>">
+          </label>
+          <label class="switch">
+            <input type="checkbox" name="allowMultipleTickets" <%= config.ticket.allowMultipleTickets ? "checked" : "" %>>
+            <span>Permitir varios tickets por pessoa</span>
+          </label>
+          <label class="switch">
+            <input type="checkbox" name="deleteClosedTickets" <%= config.ticket.deleteClosedTickets ? "checked" : "" %>>
+            <span>Apagar canal apos fechar</span>
+          </label>
+          <label class="switch">
+            <input type="checkbox" name="mentionSupport" <%= config.ticket.mentionSupport ? "checked" : "" %>>
+            <span>Mencionar cargos de suporte</span>
+          </label>
+        </div>
+      </div>
+
       <div class="form-actions">
-        <button type="submit" class="primary-button">Salvar tickets</button>
+        <button type="submit" class="primary-button">Salvar ticket</button>
       </div>
     </form>
   </div>
 
   <div class="panel">
     <div class="panel-head">
-      <h2>Enviar painel</h2>
+      <div>
+        <p class="eyebrow">Preview</p>
+        <h2>Embed no Discord</h2>
+      </div>
     </div>
-    <form method="post" action="/tickets/send" class="stack">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <label>
-        Canal
-        <input name="channelId" value="<%= config.ticket.panelChannelId %>" placeholder="ID do canal">
-      </label>
-      <button type="submit" class="secondary-button">Enviar painel de ticket</button>
-    </form>
+
+    <article class="discord-preview" style="border-left-color: <%= config.ticket.panelColor || config.accentColor %>">
+      <% if (config.ticket.panelSubtitle) { %>
+        <p class="preview-author"><%= config.ticket.panelSubtitle %></p>
+      <% } %>
+      <h3><%= config.ticket.panelTitle %></h3>
+      <p><%= config.ticket.panelDescription %></p>
+      <% (config.ticket.panelFields || []).forEach((field) => { %>
+        <div class="preview-field">
+          <strong><%= field.name %></strong>
+          <span><%= field.value %></span>
+        </div>
+      <% }) %>
+      <% if (config.ticket.panelImageUrl) { %>
+        <div class="preview-image">Imagem/banner configurado</div>
+      <% } %>
+      <small><%= config.ticket.panelFooter || config.brandName %></small>
+    </article>
+
+    <div class="section-gap">
+      <form method="post" action="/tickets/send" class="stack">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label>
+          Canal para enviar agora
+          <input name="channelId" value="<%= config.ticket.panelChannelId %>" placeholder="ID do canal">
+        </label>
+        <button type="submit" class="secondary-button">Enviar embed de ticket</button>
+      </form>
+    </div>
 
     <div class="section-gap">
       <div class="panel-head compact">
