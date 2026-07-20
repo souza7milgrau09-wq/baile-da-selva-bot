@@ -51,7 +51,11 @@ const defaultConfig = {
     openedMessage: "Obrigado por chamar a equipe. Descreva seu problema com detalhes, envie prints se precisar e aguarde atendimento.",
     openedFooter: "Use os botoes abaixo para assumir, fechar ou apagar o ticket.",
     ticketNamePattern: "ticket-{user}-{id}",
-    mentionSupport: true
+    mentionSupport: true,
+    protectPanelMessage: true,
+    panelMessageId: "",
+    panelMessageChannelId: "",
+    panelLastSentAt: ""
   },
   forms: {
     enabled: false,

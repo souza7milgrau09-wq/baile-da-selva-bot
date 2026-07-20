@@ -292,8 +292,10 @@ function createRoutes({ db, bot }) {
   });
 
   router.post("/tickets", async (req, res) => {
+    const config = await db.getConfig();
     await db.setConfig({
       ticket: {
+        ...config.ticket,
         enabled: boolFromForm(req.body.enabled),
         panelChannelId: String(req.body.panelChannelId || "").trim(),
         categoryId: String(req.body.categoryId || "").trim(),
@@ -317,7 +319,8 @@ function createRoutes({ db, bot }) {
         openedMessage: String(req.body.openedMessage || "").trim(),
         openedFooter: String(req.body.openedFooter || "").trim(),
         ticketNamePattern: String(req.body.ticketNamePattern || "ticket-{user}-{id}").trim(),
-        mentionSupport: boolFromForm(req.body.mentionSupport)
+        mentionSupport: boolFromForm(req.body.mentionSupport),
+        protectPanelMessage: boolFromForm(req.body.protectPanelMessage)
       }
     });
     setFlash(req, "success", "Tickets atualizados.");

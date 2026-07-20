@@ -39,6 +39,10 @@
             <input type="checkbox" name="enabled" <%= config.ticket.enabled ? "checked" : "" %>>
             <span>Tickets ativos</span>
           </label>
+          <label class="switch full">
+            <input type="checkbox" name="protectPanelMessage" <%= config.ticket.protectPanelMessage ? "checked" : "" %>>
+            <span>Proteger painel enviado e reenviar se apagarem</span>
+          </label>
           <label>
             Canal do painel
             <input name="panelChannelId" value="<%= config.ticket.panelChannelId %>" placeholder="ID do canal onde vai aparecer o embed">
@@ -203,6 +207,12 @@
         </label>
         <button type="submit" class="secondary-button">Enviar embed de ticket</button>
       </form>
+      <% if (config.ticket.panelMessageId) { %>
+        <dl class="detail-list">
+          <div><dt>Mensagem protegida</dt><dd><%= config.ticket.panelMessageId %></dd></div>
+          <div><dt>Canal salvo</dt><dd><%= config.ticket.panelMessageChannelId || config.ticket.panelChannelId %></dd></div>
+        </dl>
+      <% } %>
     </div>
 
     <div class="section-gap">

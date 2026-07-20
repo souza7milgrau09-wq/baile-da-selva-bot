@@ -47,7 +47,7 @@ class DiscordBot {
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.DirectMessages
       ],
-      partials: [Partials.Channel]
+      partials: [Partials.Channel, Partials.Message]
     });
 
     this.client.once(Events.ClientReady, async () => {
@@ -80,6 +80,20 @@ class DiscordBot {
       this.handleMessage(message).catch(async (error) => {
         this.lastError = error.message;
         await this.db.addEvent("message_handler_error", { message: error.message });
+      });
+    });
+
+    this.client.on(Events.MessageDelete, (message) => {
+      this.handleMessageDelete(message).catch(async (error) => {
+        this.lastError = error.message;
+        await this.db.addEvent("message_delete_handler_error", { message: error.message });
+      });
+    });
+
+    this.client.on(Events.MessageUpdate, (oldMessage, newMessage) => {
+      this.handleMessageUpdate(newMessage).catch(async (error) => {
+        this.lastError = error.message;
+        await this.db.addEvent("message_update_handler_error", { message: error.message });
       });
     });
 
@@ -498,8 +512,75 @@ class DiscordBot {
     if (!channel) {
       throw new Error("Canal do painel de ticket nao encontrado.");
     }
-    await channel.send(ticketPanel(config));
-    await this.db.addEvent("ticket_panel_sent", { channelId: channel.id });
+    const message = await channel.send(ticketPanel(config));
+    await this.db.setConfig({
+      ticket: {
+        panelChannelId: channel.id,
+        panelMessageId: message.id,
+        panelMessageChannelId: channel.id,
+        panelLastSentAt: new Date().toISOString()
+      }
+    });
+    await this.db.addEvent("ticket_panel_sent", { channelId: channel.id, messageId: message.id });
+  }
+
+  async handleMessageDelete(message) {
+    const config = await this.db.getConfig();
+    if (!config.ticket.protectPanelMessage || !config.ticket.panelMessageId) {
+      return;
+    }
+    if (message.id !== config.ticket.panelMessageId) {
+      return;
+    }
+
+    await this.restoreTicketPanel(
+      message.channelId || (message.channel && message.channel.id) || config.ticket.panelMessageChannelId,
+      "ticket_panel_deleted"
+    );
+  }
+
+  async handleMessageUpdate(message) {
+    const config = await this.db.getConfig();
+    if (!config.ticket.protectPanelMessage || !config.ticket.panelMessageId) {
+      return;
+    }
+    if (!message || message.id !== config.ticket.panelMessageId) {
+      return;
+    }
+
+    const fetched = message.partial ? await message.fetch().catch(() => null) : message;
+    if (!fetched) {
+      return;
+    }
+    if (fetched.author && this.client.user && fetched.author.id !== this.client.user.id) {
+      return;
+    }
+    if (fetched.embeds && fetched.embeds.length > 0 && fetched.components && fetched.components.length > 0) {
+      return;
+    }
+
+    await fetched.edit(ticketPanel(config)).catch(async () => {
+      await this.restoreTicketPanel(fetched.channelId || config.ticket.panelMessageChannelId, "ticket_panel_suppressed");
+    });
+    await this.db.addEvent("ticket_panel_repaired", { channelId: fetched.channelId, messageId: fetched.id });
+  }
+
+  async restoreTicketPanel(channelId, eventType) {
+    const config = await this.db.getConfig();
+    const channel = await this.fetchChannel(channelId || config.ticket.panelMessageChannelId || config.ticket.panelChannelId);
+    if (!channel) {
+      return;
+    }
+
+    const message = await channel.send(ticketPanel(config));
+    await this.db.setConfig({
+      ticket: {
+        panelMessageId: message.id,
+        panelMessageChannelId: channel.id,
+        panelLastSentAt: new Date().toISOString()
+      }
+    });
+    await this.db.addEvent(eventType, { channelId: channel.id, messageId: message.id });
   }
 
   async sendFormPanel(formId, channelId) {
