@@ -39,16 +39,19 @@
       <p class="eyebrow">Modulos</p>
       <h2>Central Baile da Selva</h2>
     </div>
-    <a href="/settings">Editar bot</a>
+    <form method="post" action="/modules/reset-all">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button type="submit" class="secondary-button" data-confirm="Desativar todas as funcoes?">Desativar tudo</button>
+    </form>
   </div>
   <div class="module-grid">
-    <% (moduleCatalog || []).forEach((item) => { %>
-      <% const moduleConfig = config.modules && config.modules[item.key] ? config.modules[item.key] : {}; %>
-      <a class="module-tile <%= moduleConfig.enabled ? 'enabled' : '' %>" href="/modules/<%= item.key %>">
-        <span class="module-icon"><%= item.icon %></span>
+    <% (categoryCatalog || []).forEach((category) => { %>
+      <% const activeCount = (category.items || []).filter((item) => config.modules && config.modules[item.key] && config.modules[item.key].enabled).length; %>
+      <a class="module-tile <%= activeCount ? 'enabled' : '' %>" href="/modules/<%= category.items[0].key %>">
+        <span class="module-icon"><%= category.icon %></span>
         <span>
-          <strong><%= item.title %></strong>
-          <small><%= moduleConfig.enabled ? "Ativo" : "Desativado" %></small>
+          <strong><%= category.title %></strong>
+          <small><%= activeCount %> ativos / <%= category.items.length %> funcoes</small>
         </span>
       </a>
     <% }) %>

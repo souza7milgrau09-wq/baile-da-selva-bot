@@ -12,48 +12,70 @@
   </span>
 </section>
 
-<section class="panel wide">
-  <div class="panel-head">
-    <div>
-      <p class="eyebrow">Configuracao</p>
-      <h2><%= panelModule.title %></h2>
-    </div>
-  </div>
-
-  <form method="post" action="/modules/<%= panelModule.key %>" class="form-grid">
+<section class="module-config">
+  <form method="post" action="/modules/<%= panelModule.key %>" class="module-form">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-    <% panelModule.fields.forEach((field) => { %>
-      <% const value = moduleConfig[field.name]; %>
-      <% if (field.type === "checkbox") { %>
-        <label class="switch">
-          <input type="checkbox" name="<%= field.name %>" <%= value ? "checked" : "" %>>
-          <span><%= field.label %></span>
-        </label>
-      <% } else if (field.type === "textarea") { %>
-        <label class="full">
-          <%= field.label %>
-          <textarea name="<%= field.name %>" rows="5" placeholder="<%= field.placeholder || '' %>"><%= Array.isArray(value) ? value.join("\n") : (value || "") %></textarea>
-        </label>
-      <% } else { %>
-        <label>
-          <%= field.label %>
-          <input
-            type="<%= field.type || 'text' %>"
-            name="<%= field.name %>"
-            value="<%= value || '' %>"
-            placeholder="<%= field.placeholder || '' %>"
-            <% if (field.min !== undefined) { %>min="<%= field.min %>"<% } %>
-          >
-        </label>
-      <% } %>
-    <% }) %>
+    <div class="config-card-grid">
+      <% (panelModule.cards || []).forEach((card) => { %>
+        <article class="config-card">
+          <div class="config-card-head">
+            <span class="card-icon"><%= card.icon || panelModule.icon %></span>
+            <div>
+              <h2><%= card.title %></h2>
+              <p><%= card.description %></p>
+            </div>
+          </div>
 
-    <div class="form-actions full">
-      <button type="submit" class="primary-button">Salvar modulo</button>
-      <a class="secondary-link" href="/">Voltar ao painel</a>
+          <div class="card-fields">
+            <% (card.fields || []).forEach((field) => { %>
+              <% const value = moduleConfig[field.name]; %>
+              <% if (field.type === "checkbox") { %>
+                <label class="switch card-switch">
+                  <input type="checkbox" name="<%= field.name %>" <%= value ? "checked" : "" %>>
+                  <span><%= field.label %></span>
+                </label>
+              <% } else if (field.type === "textarea") { %>
+                <label class="full">
+                  <%= field.label %>
+                  <textarea name="<%= field.name %>" rows="4" placeholder="<%= field.placeholder || '' %>"><%= Array.isArray(value) ? value.join("\n") : (value || "") %></textarea>
+                </label>
+              <% } else { %>
+                <label>
+                  <%= field.label %>
+                  <input
+                    type="<%= field.type || 'text' %>"
+                    name="<%= field.name %>"
+                    value="<%= value || '' %>"
+                    placeholder="<%= field.placeholder || '' %>"
+                    <% if (field.min !== undefined) { %>min="<%= field.min %>"<% } %>
+                  >
+                </label>
+              <% } %>
+            <% }) %>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+
+    <div class="module-actions">
+      <button type="submit" class="primary-button">Salvar alteracoes</button>
+      <button type="submit" class="secondary-button" form="reset-module">Redefinir tudo</button>
     </div>
   </form>
+
+  <form id="reset-module" method="post" action="/modules/<%= panelModule.key %>/reset">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  </form>
+</section>
+
+<section class="panel wide quiet-panel">
+  <div class="panel-head">
+    <h2>Comeca desligado</h2>
+  </div>
+  <p class="muted">
+    Todas as funcoes novas entram desativadas. Voce ativa so o que quiser usar no seu bot.
+  </p>
 </section>
 
 <section class="panel wide quiet-panel">
@@ -61,7 +83,7 @@
     <h2>Sem pagamentos</h2>
   </div>
   <p class="muted">
-    Este modulo e privado do Baile da Selva. Ele nao cria plano, assinatura ou cobranca para usar o painel.
+    Este painel e privado do Baile da Selva. Nao tem plano, assinatura ou cobranca para usar estas configuracoes.
   </p>
 </section>
 

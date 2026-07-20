@@ -260,22 +260,32 @@ class DiscordBot {
   }
 
   async handleAutomod(message, config) {
-    const security = config.modules && config.modules.security;
-    if (!security || !security.enabled || !security.automodEnabled || this.isStaff(message.member, config)) {
+    const antiLink = config.modules && config.modules["security-anti-link-invite"];
+    const antiSpam = config.modules && config.modules["security-anti-spam"];
+    const wordFilter = config.modules && config.modules["security-block-words-images"];
+    const enabled = Boolean(
+      (antiLink && antiLink.enabled) ||
+      (antiSpam && antiSpam.enabled) ||
+      (wordFilter && wordFilter.enabled)
+    );
+    if (!enabled || this.isStaff(message.member, config)) {
       return false;
     }
 
     const content = String(message.content || "");
     const lower = content.toLowerCase();
-    const blockedWords = security.blockedWords || [];
+    const blockedWords = wordFilter && wordFilter.enabled ? (wordFilter.blockedWords || []) : [];
     const hasBlockedWord = blockedWords.some((word) => word && lower.includes(String(word).toLowerCase()));
-    const hasInvite = security.blockInvites && /discord(?:\.gg|\.com\/invite)\//i.test(content);
-    const hasLink = security.blockLinks && /(https?:\/\/|www\.)/i.test(content);
+    const hasInvite = antiLink && antiLink.enabled && antiLink.blockInvites && /discord(?:\.gg|\.com\/invite)\//i.test(content);
+    const hasLink = antiLink && antiLink.enabled && antiLink.blockLinks && /(https?:\/\/|www\.)/i.test(content);
     const capsLetters = content.replace(/[^a-zA-Z]/g, "");
     const capsRatio = capsLetters.length ? capsLetters.replace(/[^A-Z]/g, "").length / capsLetters.length : 0;
-    const hasCaps = security.blockCaps && capsLetters.length >= 14 && capsRatio >= 0.75;
+    const hasCaps = antiSpam && antiSpam.enabled && antiSpam.blockCaps && capsLetters.length >= 14 && capsRatio >= 0.75;
+    const attachments = [...message.attachments.values()];
+    const hasImage = wordFilter && wordFilter.enabled && wordFilter.blockImages && attachments.some((item) => String(item.contentType || "").startsWith("image/"));
+    const hasFile = wordFilter && wordFilter.enabled && wordFilter.blockFiles && attachments.length > 0;
 
-    if (!hasBlockedWord && !hasInvite && !hasLink && !hasCaps) {
+    if (!hasBlockedWord && !hasInvite && !hasLink && !hasCaps && !hasImage && !hasFile) {
       return false;
     }
 
@@ -286,9 +296,18 @@ class DiscordBot {
         ? "convite externo"
         : hasLink
           ? "link externo"
-          : "caps lock";
+          : hasCaps
+            ? "caps lock"
+            : hasImage
+              ? "imagem bloqueada"
+              : "arquivo bloqueado";
 
-    const timeoutMs = Number(security.timeoutMinutes || 0) * 60 * 1000;
+    const timeoutMinutes = Math.max(
+      Number((antiLink && antiLink.timeoutMinutes) || 0),
+      Number((antiSpam && antiSpam.timeoutMinutes) || 0),
+      Number((wordFilter && wordFilter.timeoutMinutes) || 0)
+    );
+    const timeoutMs = timeoutMinutes * 60 * 1000;
     if (timeoutMs > 0 && message.member && message.member.moderatable) {
       await message.member.timeout(timeoutMs, `Automod Baile da Selva: ${reason}`).catch(() => undefined);
     }
@@ -301,7 +320,12 @@ class DiscordBot {
     }
 
     await this.db.addEvent("automod_block", { userId: message.author.id, reason });
-    const logChannel = await this.fetchChannel(security.logChannelId || config.modLogChannelId);
+    const logChannel = await this.fetchChannel(
+      (wordFilter && wordFilter.logChannelId) ||
+      (antiLink && antiLink.logChannelId) ||
+      (antiSpam && antiSpam.logChannelId) ||
+      config.modLogChannelId
+    );
     if (logChannel) {
       await logChannel.send({
         embeds: [
@@ -326,14 +350,20 @@ class DiscordBot {
 
     const args = message.content.slice(prefix.length).trim().split(/\s+/).filter(Boolean);
     const command = String(args.shift() || "").toLowerCase();
-    const entertainment = config.modules && config.modules.entertainment;
+    const commandModule = config.modules && config.modules["bot-commands"];
+    const entertainment = config.modules && config.modules["entertainment-commands"];
 
     if (!command) {
       return false;
     }
 
-    if (entertainment && entertainment.commandChannelId && message.channelId !== entertainment.commandChannelId) {
-      await message.reply(`Use comandos em <#${entertainment.commandChannelId}>.`).catch(() => undefined);
+    if ((!commandModule || !commandModule.enabled) && (!entertainment || !entertainment.enabled)) {
+      return false;
+    }
+
+    const commandChannelId = (commandModule && commandModule.channelId) || (entertainment && entertainment.channelId);
+    if (commandChannelId && message.channelId !== commandChannelId) {
+      await message.reply(`Use comandos em <#${commandChannelId}>.`).catch(() => undefined);
       return true;
     }
 
@@ -364,12 +394,12 @@ class DiscordBot {
       return true;
     }
 
-    if (command === "caraoucoroa" && (!entertainment || entertainment.coinflipEnabled)) {
+    if (command === "caraoucoroa" && entertainment && entertainment.enabled && entertainment.coinflipEnabled) {
       await message.reply(Math.random() >= 0.5 ? "Cara" : "Coroa").catch(() => undefined);
       return true;
     }
 
-    if ((command === "8ball" || command === "bola8") && (!entertainment || entertainment.eightBallEnabled)) {
+    if ((command === "8ball" || command === "bola8") && entertainment && entertainment.enabled && entertainment.eightBallEnabled) {
       const answers = [
         "Sim.",
         "Nao.",
@@ -385,7 +415,7 @@ class DiscordBot {
   }
 
   async handleAutoResponder(message, config) {
-    const community = config.modules && config.modules.community;
+    const community = config.modules && config.modules["community-auto-responder"];
     if (!community || !community.enabled || !community.autoResponderRules) {
       return;
     }
@@ -906,7 +936,7 @@ class DiscordBot {
 
   async handleVoiceState(oldState, newState) {
     const config = await this.db.getConfig();
-    const movcall = config.modules && config.modules.movcall;
+    const movcall = config.modules && config.modules["movcall-temp"];
     if (!movcall || !movcall.enabled || !movcall.creatorChannelId) {
       return;
     }

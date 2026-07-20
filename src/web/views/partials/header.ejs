@@ -30,9 +30,21 @@
       <nav class="nav" aria-label="Menu">
         <p class="nav-group">Configuracoes</p>
         <a data-nav-item class="<%= active === 'dashboard' ? 'active' : '' %>" href="/"><span class="nav-icon">IN</span> Inicio</a>
-        <a data-nav-item class="<%= active === 'settings' ? 'active' : '' %>" href="/settings"><span class="nav-icon">BT</span> Bot</a>
-        <% (moduleCatalog || []).forEach((item) => { %>
-          <a data-nav-item class="<%= active === item.key ? 'active' : '' %>" href="/modules/<%= item.key %>"><span class="nav-icon"><%= item.icon %></span> <%= item.title %></a>
+        <a data-nav-item class="<%= active === 'settings' ? 'active' : '' %>" href="/settings"><span class="nav-icon">ID</span> Identidade geral</a>
+        <% (categoryCatalog || []).forEach((category) => { %>
+          <% const categoryOpen = (category.items || []).some((item) => active === item.key); %>
+          <div class="nav-section <%= categoryOpen ? 'open' : '' %>" data-nav-section>
+            <a data-nav-item class="nav-category <%= categoryOpen ? 'active' : '' %>" href="/modules/<%= category.items[0].key %>">
+              <span class="nav-icon"><%= category.icon %></span>
+              <span><%= category.title %></span>
+              <small><%= category.items.length %></small>
+            </a>
+            <div class="nav-sublist">
+              <% category.items.forEach((item) => { %>
+                <a data-nav-item class="nav-subitem <%= active === item.key ? 'active' : '' %>" href="/modules/<%= item.key %>"><%= item.title %></a>
+              <% }) %>
+            </div>
+          </div>
         <% }) %>
         <p class="nav-group">Operacao</p>
         <a data-nav-item class="<%= active === 'tickets' ? 'active' : '' %>" href="/tickets"><span class="nav-icon">TK</span> Ticket</a>

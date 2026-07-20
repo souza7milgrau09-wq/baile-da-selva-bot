@@ -33,6 +33,44 @@ function deepMerge(base, patch) {
   return output;
 }
 
+function disableAllFeatureSwitches(config) {
+  const output = normalizeKnownModules(deepMerge(defaultConfig, config));
+  output.panelModeVersion = defaultConfig.panelModeVersion;
+
+  for (const [key, moduleDefaults] of Object.entries(defaultConfig.modules || {})) {
+    output.modules[key] = deepMerge(moduleDefaults, output.modules[key] || {});
+    for (const [fieldName, defaultValue] of Object.entries(moduleDefaults)) {
+      if (typeof defaultValue === "boolean") {
+        output.modules[key][fieldName] = false;
+      }
+    }
+  }
+
+  output.ticket = { ...output.ticket, enabled: false };
+  output.forms = {
+    ...output.forms,
+    enabled: false,
+    items: (output.forms.items || []).map((item) => ({ ...item, enabled: false }))
+  };
+  output.store = {
+    ...output.store,
+    enabled: false,
+    products: (output.store.products || []).map((item) => ({ ...item, enabled: false }))
+  };
+  output.welcome = { ...output.welcome, enabled: false };
+
+  return output;
+}
+
+function normalizeKnownModules(config) {
+  const output = deepMerge(defaultConfig, config);
+  output.modules = {};
+  for (const [key, moduleDefaults] of Object.entries(defaultConfig.modules || {})) {
+    output.modules[key] = deepMerge(moduleDefaults, (config.modules && config.modules[key]) || {});
+  }
+  return output;
+}
+
 class JsonDatabase {
   constructor(baseDir) {
     this.baseDir = baseDir;
@@ -47,7 +85,13 @@ class JsonDatabase {
     await this.ensure("submissions", []);
     await this.ensure("events", []);
     const config = await this.read("config");
-    await this.write("config", deepMerge(defaultConfig, config));
+    const merged = normalizeKnownModules(deepMerge(defaultConfig, config));
+    await this.write(
+      "config",
+      config.panelModeVersion === defaultConfig.panelModeVersion
+        ? merged
+        : disableAllFeatureSwitches(merged)
+    );
   }
 
   file(name) {

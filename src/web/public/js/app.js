@@ -16,6 +16,12 @@ if (navSearch) {
     document.querySelectorAll("[data-nav-item]").forEach((item) => {
       item.hidden = query.length > 0 && !item.textContent.toLowerCase().includes(query);
     });
+    document.querySelectorAll("[data-nav-section]").forEach((section) => {
+      const hasMatch = [...section.querySelectorAll("[data-nav-item]")]
+        .some((item) => !item.hidden);
+      section.classList.toggle("is-searching", query.length > 0 && hasMatch);
+      section.hidden = query.length > 0 && !hasMatch;
+    });
   });
 }
 

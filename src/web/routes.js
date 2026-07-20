@@ -1,5 +1,6 @@
 const express = require("express");
-const { findModule, moduleCatalog } = require("../config/moduleCatalog");
+const { categoryCatalog, findModule, moduleCatalog } = require("../config/moduleCatalog");
+const { defaultConfig } = require("../config/defaultConfig");
 const { setFlash } = require("./middleware/auth");
 const { boolFromForm, lines, parseIdList, shortId } = require("../utils/text");
 
@@ -25,12 +26,98 @@ function parseModuleForm(moduleConfig, panelModule, body) {
   return nextConfig;
 }
 
+function linkedConfigPatch(moduleKey, nextModuleConfig, config) {
+  if (moduleKey === "bot-profile") {
+    return {
+      botIdentity: {
+        ...config.botIdentity,
+        name: nextModuleConfig.botName || config.botIdentity.name || config.brandName,
+        prefix: nextModuleConfig.prefix || config.botIdentity.prefix || "bs!",
+        language: nextModuleConfig.language || config.botIdentity.language || "pt-BR",
+        tagline: nextModuleConfig.tagline || config.botIdentity.tagline || "",
+        avatarUrl: nextModuleConfig.avatarUrl || "",
+        bannerUrl: nextModuleConfig.bannerUrl || ""
+      }
+    };
+  }
+
+  if (moduleKey === "server-welcome") {
+    return {
+      welcome: {
+        ...config.welcome,
+        enabled: nextModuleConfig.enabled,
+        channelId: nextModuleConfig.channelId || config.welcome.channelId,
+        autoRoleId: nextModuleConfig.autoRoleId || config.welcome.autoRoleId,
+        message: nextModuleConfig.message || config.welcome.message
+      }
+    };
+  }
+
+  if (moduleKey === "ticket-panel") {
+    return {
+      ticket: {
+        ...config.ticket,
+        enabled: nextModuleConfig.enabled,
+        panelChannelId: nextModuleConfig.channelId || config.ticket.panelChannelId,
+        logChannelId: nextModuleConfig.logChannelId || config.ticket.logChannelId,
+        supportRoleIds: nextModuleConfig.allowedRoleIds || config.ticket.supportRoleIds,
+        panelDescription: nextModuleConfig.panelText || config.ticket.panelDescription
+      }
+    };
+  }
+
+  if (moduleKey === "ticket-transcripts") {
+    return {
+      ticket: {
+        ...config.ticket,
+        transcriptChannelId: nextModuleConfig.channelId || config.ticket.transcriptChannelId,
+        logChannelId: nextModuleConfig.logChannelId || config.ticket.logChannelId,
+        deleteClosedTickets: nextModuleConfig.deleteClosedTicket || false
+      }
+    };
+  }
+
+  if (moduleKey === "ticket-forms") {
+    const form = (config.forms.items && config.forms.items[0]) || {};
+    return {
+      forms: {
+        ...config.forms,
+        enabled: nextModuleConfig.enabled,
+        panelChannelId: nextModuleConfig.channelId || config.forms.panelChannelId,
+        reviewChannelId: nextModuleConfig.logChannelId || config.forms.reviewChannelId,
+        items: [
+          {
+            ...form,
+            enabled: nextModuleConfig.enabled,
+            questions: lines(nextModuleConfig.questions, 5)
+          }
+        ]
+      }
+    };
+  }
+
+  if (moduleKey === "conversions-store") {
+    return {
+      store: {
+        ...config.store,
+        enabled: nextModuleConfig.enabled,
+        panelChannelId: nextModuleConfig.channelId || config.store.panelChannelId,
+        orderLogChannelId: nextModuleConfig.logChannelId || config.store.orderLogChannelId,
+        panelDescription: nextModuleConfig.storeText || config.store.panelDescription
+      }
+    };
+  }
+
+  return {};
+}
+
 function createRoutes({ db, bot }) {
   const router = express.Router();
 
   router.use(async (req, res, next) => {
     res.locals.config = await db.getConfig();
     res.locals.botStatus = bot.getStatus();
+    res.locals.categoryCatalog = categoryCatalog;
     res.locals.moduleCatalog = moduleCatalog;
     next();
   });
@@ -97,6 +184,27 @@ function createRoutes({ db, bot }) {
     res.redirect("/");
   });
 
+  router.post("/modules/reset-all", async (req, res) => {
+    const config = await db.getConfig();
+    await db.setConfig({
+      modules: defaultConfig.modules,
+      ticket: { ...config.ticket, enabled: false },
+      forms: {
+        ...config.forms,
+        enabled: false,
+        items: (config.forms.items || []).map((item) => ({ ...item, enabled: false }))
+      },
+      store: {
+        ...config.store,
+        enabled: false,
+        products: (config.store.products || []).map((item) => ({ ...item, enabled: false }))
+      },
+      welcome: { ...config.welcome, enabled: false }
+    });
+    setFlash(req, "success", "Todas as funcoes foram desativadas.");
+    res.redirect("/");
+  });
+
   router.get("/modules/:moduleKey", (req, res, next) => {
     const panelModule = findModule(req.params.moduleKey);
     if (!panelModule) {
@@ -119,12 +227,29 @@ function createRoutes({ db, bot }) {
     }
     const config = await db.getConfig();
     const currentModuleConfig = (config.modules && config.modules[panelModule.key]) || {};
+    const nextModuleConfig = parseModuleForm(currentModuleConfig, panelModule, req.body);
     await db.setConfig({
       modules: {
-        [panelModule.key]: parseModuleForm(currentModuleConfig, panelModule, req.body)
-      }
+        [panelModule.key]: nextModuleConfig
+      },
+      ...linkedConfigPatch(panelModule.key, nextModuleConfig, config)
     });
     setFlash(req, "success", `${panelModule.title} salvo.`);
+    res.redirect(`/modules/${panelModule.key}`);
+  });
+
+  router.post("/modules/:moduleKey/reset", async (req, res, next) => {
+    const panelModule = findModule(req.params.moduleKey);
+    if (!panelModule) {
+      next();
+      return;
+    }
+    await db.setConfig({
+      modules: {
+        [panelModule.key]: defaultConfig.modules[panelModule.key] || { enabled: false }
+      }
+    });
+    setFlash(req, "success", `${panelModule.title} redefinido e desativado.`);
     res.redirect(`/modules/${panelModule.key}`);
   });
 

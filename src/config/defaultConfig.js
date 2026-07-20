@@ -1,4 +1,7 @@
+const { buildDefaultModules } = require("./moduleCatalog");
+
 const defaultConfig = {
+  panelModeVersion: 3,
   guildId: "",
   clientId: "",
   brandName: "Baile da Selva",
@@ -14,91 +17,9 @@ const defaultConfig = {
   },
   staffRoleIds: [],
   modLogChannelId: "",
-  modules: {
-    security: {
-      enabled: true,
-      automodEnabled: true,
-      blockInvites: true,
-      blockLinks: false,
-      blockCaps: false,
-      blockedWords: [],
-      timeoutMinutes: 0,
-      logChannelId: ""
-    },
-    server: {
-      enabled: true,
-      rulesChannelId: "",
-      announcementsChannelId: "",
-      memberLogChannelId: "",
-      statsEnabled: false,
-      statsChannelId: "",
-      slowmodeSeconds: 0
-    },
-    community: {
-      enabled: true,
-      levelingEnabled: false,
-      xpPerMessage: 10,
-      suggestionsChannelId: "",
-      giveawaysChannelId: "",
-      reactionRolesNote: "",
-      autoResponderRules: ""
-    },
-    entertainment: {
-      enabled: true,
-      funCommandsEnabled: true,
-      coinflipEnabled: true,
-      eightBallEnabled: true,
-      commandChannelId: "",
-      blockedChannels: []
-    },
-    vips: {
-      enabled: true,
-      vipRoleId: "",
-      vipChannelId: "",
-      syncWithStore: true,
-      benefits: [
-        "Cargo VIP no Discord",
-        "Atendimento prioritario",
-        "Acesso a areas especiais"
-      ],
-      welcomeVipMessage: "VIP liberado para {user}. Aproveite os beneficios do Baile da Selva!"
-    },
-    movcall: {
-      enabled: false,
-      creatorChannelId: "",
-      categoryId: "",
-      defaultUserLimit: 0,
-      channelNameTemplate: "Call de {user}",
-      allowOwnerLock: true
-    },
-    checkers: {
-      enabled: false,
-      channelId: "",
-      rankingEnabled: true,
-      allowSpectators: true,
-      winRoleId: "",
-      rulesText: "Partidas organizadas pela equipe do Baile da Selva."
-    },
-    tools: {
-      enabled: true,
-      embedBuilderEnabled: true,
-      scheduledMessagesEnabled: false,
-      stickyMessagesEnabled: false,
-      autoPurgeEnabled: false,
-      purgeChannelIds: [],
-      backupNote: "Use esta area para anotar rotinas de backup e limpeza."
-    },
-    conversions: {
-      enabled: true,
-      calculatorEnabled: true,
-      robuxRate: "1000 Robux = R$ 35",
-      taxPercent: 30,
-      resultChannelId: "",
-      notes: "Modulo interno. Sem assinatura ou cobranca para usar o painel."
-    }
-  },
+  modules: buildDefaultModules(),
   ticket: {
-    enabled: true,
+    enabled: false,
     panelChannelId: "",
     categoryId: "",
     logChannelId: "",
@@ -112,7 +33,7 @@ const defaultConfig = {
     openedMessage: "Obrigado por chamar a equipe. Descreva seu problema com detalhes."
   },
   forms: {
-    enabled: true,
+    enabled: false,
     panelChannelId: "",
     reviewChannelId: "",
     activeFormId: "staff",
@@ -130,12 +51,12 @@ const defaultConfig = {
           "Qual sua experiencia com comunidades?",
           "Qual horario voce costuma ficar online?"
         ],
-        enabled: true
+        enabled: false
       }
     ]
   },
   store: {
-    enabled: true,
+    enabled: false,
     panelChannelId: "",
     orderCategoryId: "",
     orderLogChannelId: "",
@@ -151,7 +72,7 @@ const defaultConfig = {
         description: "Cargo VIP no Discord e beneficios combinados com a equipe.",
         deliveryText: "Seu VIP foi entregue. Obrigado por apoiar o Baile da Selva!",
         roleId: "",
-        enabled: true
+        enabled: false
       }
     ]
   },
