@@ -15,6 +15,9 @@ function createWebApp({ db, bot }) {
 
   app.set("view engine", "ejs");
   app.set("views", viewsDir);
+  if (process.env.RENDER || process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+  }
   app.disable("x-powered-by");
 
   app.use(helmet({
