@@ -1,0 +1,40 @@
+<%- include("partials/header") %>
+
+<section class="panel wide">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow"><%= categories.reduce((total, category) => total + category.commands.length, 0) %> comandos instalados</p>
+      <h2>Controle individual</h2>
+      <p>Todos comecam desativados. Abra um comando para liberar o uso e definir cooldown, cargos e canais.</p>
+    </div>
+  </div>
+</section>
+
+<% categories.forEach((category) => { %>
+  <section class="panel wide section-gap">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">Categoria</p>
+        <h2><%= category.name %></h2>
+      </div>
+      <span class="badge"><%= category.commands.length %> comandos</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Comando</th><th>Descricao</th><th>Status</th><th>Configurar</th></tr></thead>
+        <tbody>
+          <% category.commands.forEach((command) => { const access = (config.commandAccess && config.commandAccess[command.name]) || {}; %>
+            <tr>
+              <td><strong><%= config.botIdentity.prefix %><%= command.name %></strong></td>
+              <td><%= command.description %></td>
+              <td><span class="badge"><%= access.enabled ? "Ativo" : "Desativado" %></span></td>
+              <td><a class="secondary-link" href="/commands/<%= command.name %>">Abrir</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% }) %>
+
+<%- include("partials/footer") %>

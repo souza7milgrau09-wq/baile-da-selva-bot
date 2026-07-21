@@ -54,7 +54,7 @@ function linkedConfigPatch(moduleKey, nextModuleConfig, config) {
       botIdentity: {
         ...config.botIdentity,
         name: nextModuleConfig.botName || config.botIdentity.name || config.brandName,
-        prefix: nextModuleConfig.prefix || config.botIdentity.prefix || "bs!",
+        prefix: nextModuleConfig.prefix || config.botIdentity.prefix || "!",
         language: nextModuleConfig.language || config.botIdentity.language || "pt-BR",
         tagline: nextModuleConfig.tagline || config.botIdentity.tagline || "",
         avatarUrl: nextModuleConfig.avatarUrl || "",
@@ -181,6 +181,46 @@ function createRoutes({ db, bot }) {
     res.render("settings", { title: "Geral", active: "settings" });
   });
 
+  router.get("/commands", async (req, res) => {
+    await bot.prefixLoadPromise;
+    const commands = bot.prefixCommands.list();
+    const categories = bot.prefixCommands.categories().map((name) => ({
+      name,
+      commands: commands.filter((command) => command.category === name)
+    }));
+    res.render("commands", { title: "Comandos por prefixo", active: "commands", categories });
+  });
+
+  router.get("/commands/:commandName", async (req, res, next) => {
+    await bot.prefixLoadPromise;
+    const command = bot.prefixCommands.get(req.params.commandName);
+    if (!command || command.name !== req.params.commandName) return next();
+    res.render("command-settings", {
+      title: `Comando ${command.name}`,
+      active: "commands",
+      command,
+      commandConfig: (res.locals.config.commandAccess && res.locals.config.commandAccess[command.name]) || {}
+    });
+  });
+
+  router.post("/commands/:commandName", async (req, res, next) => {
+    await bot.prefixLoadPromise;
+    const command = bot.prefixCommands.get(req.params.commandName);
+    if (!command || command.name !== req.params.commandName) return next();
+    await db.setConfig({
+      commandAccess: {
+        [command.name]: {
+          enabled: boolFromForm(req.body.enabled),
+          cooldownSeconds: Math.min(86400, Math.max(0, Number(req.body.cooldownSeconds ?? command.cooldown))),
+          allowedRoleIds: parseIdList(req.body.allowedRoleIds),
+          allowedChannelIds: parseIdList(req.body.allowedChannelIds)
+        }
+      }
+    });
+    setFlash(req, "success", `Comando ${command.name} atualizado.`);
+    res.redirect(`/commands/${command.name}`);
+  });
+
   router.post("/settings", async (req, res) => {
     await db.setConfig({
       guildId: String(req.body.guildId || "").trim(),
@@ -190,11 +230,16 @@ function createRoutes({ db, bot }) {
       accentColor: String(req.body.accentColor || "#24c46b").trim(),
       botIdentity: {
         name: String(req.body.botName || req.body.brandName || "Baile da Selva").trim(),
-        prefix: String(req.body.prefix || "bs!").trim().slice(0, 8),
+        prefix: String(req.body.prefix || "!").trim().slice(0, 5),
         language: String(req.body.language || "pt-BR").trim(),
         tagline: String(req.body.tagline || "").trim(),
         avatarUrl: String(req.body.avatarUrl || "").trim(),
         bannerUrl: String(req.body.bannerUrl || "").trim()
+      },
+      ownerIds: parseIdList(req.body.ownerIds),
+      commandPermissions: {
+        allowedRoleIds: parseIdList(req.body.allowedCommandRoleIds),
+        allowedChannelIds: parseIdList(req.body.allowedCommandChannelIds)
       },
       staffRoleIds: parseIdList(req.body.staffRoleIds),
       modLogChannelId: String(req.body.modLogChannelId || "").trim()

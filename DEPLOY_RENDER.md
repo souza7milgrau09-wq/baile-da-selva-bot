@@ -54,9 +54,13 @@ GUILD_ID=id_do_servidor
 DASHBOARD_PASSWORD=sua_senha_do_painel
 SESSION_SECRET=um_texto_grande_aleatorio
 NODE_ENV=production
+DATABASE_DRIVER=json
+OWNER_IDS=id_do_seu_usuario_discord
 ```
 
 Nao coloque `DASHBOARD_HOST` nem `DASHBOARD_PORT` no Render. Ele usa a variavel `PORT` automaticamente.
+
+Use exatamente `npm install` no Build Command. O projeto nao usa mais o lockfile do pnpm porque as dependencias de voz do DisTube precisam ser instaladas pelo npm no Render.
 
 ## 5. Plano gratis ou pago
 

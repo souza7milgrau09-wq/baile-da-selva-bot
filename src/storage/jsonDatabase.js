@@ -7,7 +7,18 @@ const files = {
   tickets: "tickets.json",
   orders: "orders.json",
   submissions: "submissions.json",
-  events: "events.json"
+  events: "events.json",
+  economy: "economy.json",
+  xp: "xp.json",
+  warns: "warns.json",
+  afk: "afk.json",
+  snipes: "snipes.json",
+  editsnipes: "editsnipes.json",
+  backups: "backups.json",
+  reminders: "reminders.json",
+  blacklist: "blacklist.json",
+  whitelist: "whitelist.json",
+  commandStats: "command-stats.json"
 };
 
 function clone(value) {
@@ -84,6 +95,17 @@ class JsonDatabase {
     await this.ensure("orders", []);
     await this.ensure("submissions", []);
     await this.ensure("events", []);
+    await this.ensure("economy", {});
+    await this.ensure("xp", {});
+    await this.ensure("warns", []);
+    await this.ensure("afk", {});
+    await this.ensure("snipes", {});
+    await this.ensure("editsnipes", {});
+    await this.ensure("backups", []);
+    await this.ensure("reminders", []);
+    await this.ensure("blacklist", []);
+    await this.ensure("whitelist", []);
+    await this.ensure("commandStats", {});
     const config = await this.read("config");
     const merged = normalizeKnownModules(deepMerge(defaultConfig, config));
     await this.write(
@@ -151,6 +173,33 @@ class JsonDatabase {
       });
       return events.slice(0, 300);
     });
+  }
+
+  scopeKey(guildId, userId) {
+    return `${guildId || "global"}:${userId}`;
+  }
+
+  async getScoped(name, guildId, userId, defaults = {}) {
+    const records = await this.read(name);
+    return deepMerge(defaults, records[this.scopeKey(guildId, userId)] || {});
+  }
+
+  async updateScoped(name, guildId, userId, defaults, updater) {
+    const key = this.scopeKey(guildId, userId);
+    let saved;
+    await this.update(name, async (records) => {
+      const current = deepMerge(defaults || {}, records[key] || {});
+      saved = await updater(current);
+      return { ...records, [key]: saved };
+    });
+    return saved;
+  }
+
+  async incrementCommand(commandName) {
+    return this.update("commandStats", async (stats) => ({
+      ...stats,
+      [commandName]: Number(stats[commandName] || 0) + 1
+    }));
   }
 }
 

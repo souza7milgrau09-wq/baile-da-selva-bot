@@ -9,14 +9,73 @@ const defaultConfig = {
   accentColor: "#24c46b",
   botIdentity: {
     name: "Baile da Selva",
-    prefix: "bs!",
+    prefix: "!",
     language: "pt-BR",
     tagline: "Painel privado do bot do Baile da Selva",
     avatarUrl: "",
     bannerUrl: ""
   },
+  ownerIds: [],
+  commandPermissions: {
+    allowedRoleIds: [],
+    allowedChannelIds: [],
+    blockedUserIds: [],
+    maintenance: false,
+    maintenanceMessage: "O bot esta em manutencao. Tente novamente em alguns minutos."
+  },
+  commandAccess: {},
   staffRoleIds: [],
   modLogChannelId: "",
+  leave: {
+    enabled: false,
+    channelId: "",
+    message: "{user} saiu do {server}."
+  },
+  logs: {
+    enabled: false,
+    channelId: "",
+    moderationChannelId: "",
+    ticketsChannelId: "",
+    economyChannelId: "",
+    xpChannelId: ""
+  },
+  verification: {
+    enabled: false,
+    channelId: "",
+    roleId: ""
+  },
+  economy: {
+    enabled: false,
+    currencyName: "Folhas",
+    dailyReward: 250,
+    weeklyReward: 1250,
+    monthlyReward: 5000,
+    workMin: 80,
+    workMax: 260,
+    shop: [
+      {
+        id: "folha-dourada",
+        name: "Folha Dourada",
+        price: 1500,
+        sellPrice: 750,
+        description: "Item colecionavel do Baile da Selva.",
+        usable: false,
+        roleId: ""
+      }
+    ]
+  },
+  leveling: {
+    enabled: false,
+    xpPerMessage: 15,
+    cooldownSeconds: 60,
+    rewardRoles: []
+  },
+  music: {
+    enabled: false,
+    defaultVolume: 50,
+    maxVolume: 150,
+    djRoleIds: []
+  },
   modules: buildDefaultModules(),
   ticket: {
     enabled: false,

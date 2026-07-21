@@ -21,3 +21,9 @@ services:
         sync: false
       - key: SESSION_SECRET
         sync: false
+      - key: DATABASE_DRIVER
+        value: json
+      - key: OWNER_IDS
+        sync: false
+      - key: RENDER_DEPLOY_HOOK
+        sync: false

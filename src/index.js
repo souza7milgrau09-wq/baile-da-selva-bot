@@ -3,7 +3,7 @@ require("dotenv").config();
 const path = require("node:path");
 const { DiscordBot } = require("./bot/client");
 const { defaultConfig } = require("./config/defaultConfig");
-const { JsonDatabase } = require("./storage/jsonDatabase");
+const { createDatabase } = require("./storage/createDatabase");
 const { createWebApp } = require("./web/app");
 
 async function bootstrapConfig(db) {
@@ -26,7 +26,7 @@ async function main() {
   const dataDir = process.env.DATA_DIR
     ? path.resolve(process.env.DATA_DIR)
     : path.resolve(__dirname, "..", "data");
-  const db = new JsonDatabase(dataDir);
+  const db = createDatabase(dataDir);
   await db.init();
   await bootstrapConfig(db);
 

@@ -1,0 +1,48 @@
+<%- include("partials/header") %>
+
+<section class="profile-banner compact-banner">
+  <div class="profile-avatar">CM</div>
+  <div>
+    <p class="eyebrow"><%= command.category %></p>
+    <h2><%= config.botIdentity.prefix %><%= command.name %></h2>
+    <p><%= command.description %></p>
+  </div>
+</section>
+
+<section class="panel wide">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Permissoes do comando</p>
+      <h2>Uso e acesso</h2>
+    </div>
+    <a class="secondary-link" href="/commands">Voltar</a>
+  </div>
+  <form method="post" action="/commands/<%= command.name %>" class="form-grid">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label class="toggle-line full">
+      <input type="checkbox" name="enabled" <%= commandConfig.enabled ? "checked" : "" %>>
+      <span>Ativar este comando</span>
+    </label>
+    <label>
+      Cooldown em segundos
+      <input type="number" min="0" max="86400" name="cooldownSeconds" value="<%= commandConfig.cooldownSeconds === undefined ? command.cooldown : commandConfig.cooldownSeconds %>">
+    </label>
+    <label>
+      Uso
+      <input value="<%= config.botIdentity.prefix %><%= command.name %><%= command.usage ? ' ' + command.usage : '' %>" disabled>
+    </label>
+    <label class="full">
+      Cargos permitidos
+      <textarea name="allowedRoleIds" rows="4" placeholder="Vazio permite todos; um ID por linha"><%= (commandConfig.allowedRoleIds || []).join("\n") %></textarea>
+    </label>
+    <label class="full">
+      Canais permitidos
+      <textarea name="allowedChannelIds" rows="4" placeholder="Vazio permite todos; um ID por linha"><%= (commandConfig.allowedChannelIds || []).join("\n") %></textarea>
+    </label>
+    <div class="form-actions full">
+      <button class="primary-button" type="submit">Salvar comando</button>
+    </div>
+  </form>
+</section>
+
+<%- include("partials/footer") %>

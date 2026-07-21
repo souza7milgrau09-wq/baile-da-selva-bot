@@ -68,7 +68,7 @@ const categoryCatalog = [
           statusCard("Quando ativado, o painel usa estes dados como identidade principal."),
           rulesCard([
             { name: "botName", label: "Nome do bot", type: "text", placeholder: "Baile da Selva" },
-            { name: "prefix", label: "Prefixo", type: "text", placeholder: "bs!" },
+            { name: "prefix", label: "Prefixo", type: "text", placeholder: "!" },
             { name: "language", label: "Idioma", type: "text", placeholder: "pt-BR" }
           ]),
           rulesCard([

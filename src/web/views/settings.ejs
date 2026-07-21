@@ -28,7 +28,7 @@
     </label>
     <label>
       Prefixo
-      <input name="prefix" value="<%= config.botIdentity && config.botIdentity.prefix ? config.botIdentity.prefix : 'bs!' %>" maxlength="8">
+      <input name="prefix" value="<%= config.botIdentity && config.botIdentity.prefix ? config.botIdentity.prefix : '!' %>" maxlength="5">
     </label>
     <label>
       Idioma
@@ -69,6 +69,18 @@
     <label class="full">
       Cargos da equipe
       <textarea name="staffRoleIds" rows="3" placeholder="Um ID por linha"><%= (config.staffRoleIds || []).join("\n") %></textarea>
+    </label>
+    <label class="full">
+      IDs dos donos autorizados
+      <textarea name="ownerIds" rows="3" placeholder="Um ID de usuario por linha"><%= (config.ownerIds || []).join("\n") %></textarea>
+    </label>
+    <label class="full">
+      Cargos autorizados a usar comandos
+      <textarea name="allowedCommandRoleIds" rows="3" placeholder="Vazio permite todos; um ID por linha"><%= ((config.commandPermissions && config.commandPermissions.allowedRoleIds) || []).join("\n") %></textarea>
+    </label>
+    <label class="full">
+      Canais autorizados para comandos
+      <textarea name="allowedCommandChannelIds" rows="3" placeholder="Vazio permite todos; um ID por linha"><%= ((config.commandPermissions && config.commandPermissions.allowedChannelIds) || []).join("\n") %></textarea>
     </label>
     <div class="form-actions full">
       <button type="submit" class="primary-button">Salvar geral</button>

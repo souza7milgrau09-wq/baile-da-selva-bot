@@ -3,4 +3,7 @@ node_modules/
 npm-debug.log*
 data/*.json
 data/*.tmp
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal
 transcripts/

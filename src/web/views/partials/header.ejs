@@ -20,7 +20,7 @@
         <span class="bot-avatar"><%= ((config.botIdentity && config.botIdentity.name) || config.brandName || "B").slice(0, 1).toUpperCase() %></span>
         <span>
           <strong><%= (config.botIdentity && config.botIdentity.name) || config.brandName || "Baile da Selva" %></strong>
-          <small><%= config.botIdentity && config.botIdentity.prefix ? config.botIdentity.prefix : "bs!" %> comandos</small>
+          <small><%= config.botIdentity && config.botIdentity.prefix ? config.botIdentity.prefix : "!" %> comandos</small>
         </span>
       </div>
       <label class="nav-search">
@@ -31,6 +31,7 @@
         <p class="nav-group">Configuracoes</p>
         <a data-nav-item class="<%= active === 'dashboard' ? 'active' : '' %>" href="/"><span class="nav-icon">IN</span> Inicio</a>
         <a data-nav-item class="<%= active === 'settings' ? 'active' : '' %>" href="/settings"><span class="nav-icon">ID</span> Identidade geral</a>
+        <a data-nav-item class="<%= active === 'commands' ? 'active' : '' %>" href="/commands"><span class="nav-icon">CM</span> Comandos por prefixo</a>
         <% (categoryCatalog || []).forEach((category) => { %>
           <% const categoryOpen = (category.items || []).some((item) => active === item.key); %>
           <div class="nav-section <%= categoryOpen ? 'open' : '' %>" data-nav-section>

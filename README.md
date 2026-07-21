@@ -9,6 +9,9 @@ Bot profissional para Discord com painel web local. Ele inclui:
 - Boas-vindas com mensagem e cargo automatico.
 - Registro de eventos no painel.
 - Comandos slash para enviar paineis pelo Discord.
+- 142 comandos por prefixo com carregamento automatico por categoria.
+- Economia, XP, moderacao, seguranca, logs, AFK, lembretes e musica com DisTube.
+- Banco JSON por padrao e SQLite opcional.
 
 ## 1. Abrir no VS Code
 
@@ -36,6 +39,8 @@ CLIENT_ID=id_da_sua_aplicacao
 GUILD_ID=id_do_seu_servidor
 DASHBOARD_PASSWORD=uma_senha_forte_para_o_painel
 SESSION_SECRET=um_texto_grande_aleatorio
+DATABASE_DRIVER=json
+OWNER_IDS=
 ```
 
 Nunca envie o token do bot para ninguem e nunca publique o arquivo `.env`.
@@ -48,6 +53,8 @@ Na pagina do seu bot, ative:
 - Message Content Intent
 
 O bot usa isso para boas-vindas, cargos automaticos e transcript dos tickets.
+
+O bot tambem usa o intent de voz comum para musica. Ele ja e solicitado pelo codigo e nao aparece na area de intents privilegiados.
 
 ## 4. Convidar o bot
 
@@ -148,6 +155,8 @@ Cole esses IDs no painel.
 - `/painel-formulario`
 - `/painel-loja`
 
+Os 142 comandos por prefixo estao em `COMMANDS.md`. Para ativa-los, entre no painel, abra **Bot > Comandos** e ligue **Ativar esta funcao** e **Comandos por prefixo**. Depois use a tela **Comandos por prefixo** para ativar cada comando e configurar cooldown, cargos e canais. O prefixo padrao e `!`.
+
 ## 9. Dados salvos
 
 Os dados ficam na pasta `data/`:
@@ -157,6 +166,15 @@ Os dados ficam na pasta `data/`:
 - `orders.json`
 - `submissions.json`
 - `events.json`
+- `economy.json`
+- `xp.json`
+- `warns.json`
+- `afk.json`
+- `snipes.json` e `editsnipes.json`
+- `reminders.json`
+- `blacklist.json` e `whitelist.json`
+
+Para usar SQLite, configure `DATABASE_DRIVER=sqlite`. O arquivo sera `data/baile-da-selva.sqlite`. Use Node.js 22.12 ou superior.
 
 Essa pasta e local. Para hospedar em VPS, faca backup dela.
 
@@ -166,6 +184,7 @@ Essa pasta e local. Para hospedar em VPS, faca backup dela.
 - Para entregar cargos, o cargo do bot precisa estar acima do cargo que ele vai entregar.
 - Para transcripts com texto das mensagens, o Message Content Intent precisa estar ativo.
 - Se colocar o painel online, use senha forte, `SESSION_SECRET` forte e HTTPS.
+- Musica exige Node.js 22.12+, FFmpeg e as dependencias instaladas por `npm install`.
 
 ## 11. GitHub e Render
 
