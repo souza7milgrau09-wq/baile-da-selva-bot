@@ -174,7 +174,7 @@ Os dados ficam na pasta `data/`:
 - `reminders.json`
 - `blacklist.json` e `whitelist.json`
 
-Para usar SQLite, configure `DATABASE_DRIVER=sqlite`. O arquivo sera `data/baile-da-selva.sqlite`. Use Node.js 22.12 ou superior.
+Para usar SQLite, configure `DATABASE_DRIVER=sqlite`. O arquivo sera `data/baile-da-selva.sqlite`. O projeto usa Node.js 22.23.1.
 
 Essa pasta e local. Para hospedar em VPS, faca backup dela.
 
@@ -184,7 +184,7 @@ Essa pasta e local. Para hospedar em VPS, faca backup dela.
 - Para entregar cargos, o cargo do bot precisa estar acima do cargo que ele vai entregar.
 - Para transcripts com texto das mensagens, o Message Content Intent precisa estar ativo.
 - Se colocar o painel online, use senha forte, `SESSION_SECRET` forte e HTTPS.
-- Musica exige Node.js 22.12+, FFmpeg e as dependencias instaladas por `npm install`.
+- Musica exige Node.js 22.23.1, FFmpeg e as dependencias instaladas por `npm ci` no Render.
 
 ## 11. GitHub e Render
 

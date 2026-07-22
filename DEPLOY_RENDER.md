@@ -38,7 +38,7 @@ Se o Git pedir login, entre com sua conta do GitHub.
 ```txt
 Name: baile-da-selva-bot
 Runtime: Node
-Build Command: npm install
+Build Command: npm ci
 Start Command: npm start
 Health Check Path: /healthz
 ```
@@ -60,7 +60,7 @@ OWNER_IDS=id_do_seu_usuario_discord
 
 Nao coloque `DASHBOARD_HOST` nem `DASHBOARD_PORT` no Render. Ele usa a variavel `PORT` automaticamente.
 
-Use exatamente `npm install` no Build Command. O projeto nao usa mais o lockfile do pnpm porque as dependencias de voz do DisTube precisam ser instaladas pelo npm no Render.
+Use exatamente `npm ci` no Build Command. O projeto possui `package-lock.json` e fixa o Node.js 22.23.1 para que o Render instale sempre as mesmas versoes compativeis.
 
 ## 5. Plano gratis ou pago
 
